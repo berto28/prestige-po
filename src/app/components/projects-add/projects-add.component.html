@@ -1,0 +1,19 @@
+<div class="marginBottom">
+  <h2>Add Project</h2>
+  <div class="row">
+      <div class="input-field col s6">
+        <input id="projectName" type="text" 
+        [(ngModel)]="prestige.txtProject">
+        <label for="projectName">Project Name</label>
+        <div class="right center-align">
+            <a class="waves-effect waves-light btn"
+            (click)="onClickSaveProject()">
+              <i class="material-icons right">save</i>
+              Add Project
+            </a>    
+            <span class="helper-text teal-text"
+            *ngIf="prestige.project_isAdding"> adding project.. </span>
+        </div>
+      </div>
+  </div>
+</div>

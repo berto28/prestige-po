@@ -1,0 +1,12 @@
+<ul id="slide-out" class="sidenav sidenav-fixed deep-orange">
+  <li><div class="user-view">
+    <div class="background">
+      <img [src]="background">
+    </div>
+    <a href="#user"><img class="circle" [src]="icon"></a>
+    <a href="#name"><span class="white-text name">Prestige Glass</span></a>
+    <a href="#email"><span class="white-text email">prestige@gmail.com</span></a>
+  </div></li>
+  <li><a routerLink="/canvas" class="white-text" (click)="onClickNav('Canvas')">Canvas<i class="material-icons right white-text">view_module</i></a></li>
+  <li><a routerLink="/projects" class="white-text" (click)="onClickNav('Projects')">Projects<i class="material-icons right white-text">business</i></a></li>
+</ul>

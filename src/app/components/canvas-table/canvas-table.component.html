@@ -1,0 +1,55 @@
+<div>
+  <h2>List of Items 
+    <a class="btn waves-effect wave-light" (click)="onClickViewAll()">view all</a>
+    <span *ngIf="prestige.isCanvasExist">No item with that supplier, section and color</span>
+  </h2>
+  <div class="progress" *ngIf="prestige.materialList.length == 0 && prestige.isCanvasExist == false">
+      <div class="indeterminate"></div>
+  </div>
+  <div class="row">
+    <div class="col s12">
+      <table class="centered highlight">
+        <thead>
+          <tr>
+              <th>Supplier</th>
+              <th>Section</th>
+              <th>Color</th>
+              <th>Material Name</th>
+              <th>Price</th>
+              <th></th>
+          </tr>
+        </thead>
+
+        <tbody in-view-container>
+          
+          <tr *ngFor="let m of prestige.materialList | slice:fromStart:toEnd">
+            <td>{{ m.supplier }}</td>
+            <td>{{ m.section }}</td>
+            <td>{{ m.color }}</td>
+            <td>{{ m.materialName }}</td>
+            <td>{{ m.price | currency:'&#x20B1;'}}</td>
+            <td>
+              <a 
+              class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+              (click)="onClickEditMaterial(m)"
+              > <i class="material-icons">edit</i></a>
+              <a 
+              class="btn red left"
+              (click)="onClickDeleteMaterial(m)"
+              > <i class="material-icons">delete</i></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<app-modal-update 
+[editData]="prestige.maaterial_modalUpdateFields"
+(updatedMaterial)="onClickUpdateModal($event)"
+></app-modal-update>
+<app-modal-delete></app-modal-delete>
+<!-- <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Modal</a> -->
+
+  
+          

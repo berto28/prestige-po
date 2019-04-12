@@ -1,0 +1,47 @@
+<!-- Modal Structure -->
+<div id="modal1" class="modal bottom-sheet modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Add PO</h4>
+      <div class="row">
+        <div class="col s6">
+          <app-dropdown-color (color)="onSelectSupplier($event)" 
+          [dropdownData]="prestige.dropdownSupplier"></app-dropdown-color>
+        </div>
+        <div class="col s6">
+          <app-dropdown-color (color)="onSelectSection($event)" 
+          [dropdownData]="prestige.dropdownSection"></app-dropdown-color>
+        </div>
+        <div class="col s6 offset-s6">
+            <div class="col s4" *ngFor="let c of prestige.dropdownColor.arr; let i = index">
+              <p (click)="onClickRadioButton(c, $event, i)">
+                <label>
+                  <input name="group1" class="with-gap" [checked]="isRadioCheck[i]"  type="radio"/>
+                  <span>{{ c }}</span>
+                </label>
+              </p>
+            </div>
+        </div>
+      </div>
+      <div class="progress" *ngIf="prestige.projects_materialList.length == 0 && supplierPick !=null">
+          <div class="indeterminate"></div>
+      </div>
+      <div class="row">
+        <ng-container *ngFor="let m of prestige.projects_materialList">
+            <div class="col s3 input-field" *ngIf="m.isShow">
+              <p (click)="onClickCheckBox(m, $event)">
+                <label>
+                  <input type="checkbox" [(ngModel)]="!m.isCheck" />
+                  <span>{{ m.materialName }}<br> {{ m.price | currency:'&#x20B1;'}}</span>
+                </label>
+              </p>
+              <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.qty">
+            </div>
+        </ng-container>
+        
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close waves-effect waves-light btn red">close</a>&nbsp;
+      <a class="waves-effect waves-light btn"  (click)="onClickSavePO()">Save PO</a>
+    </div>
+  </div>

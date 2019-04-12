@@ -7,4 +7,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'prestige-app';
+  pageTitle: string;
+
+  savePageTitle(title):void {
+    this.pageTitle = title;
+  }
 }

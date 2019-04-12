@@ -1,0 +1,14 @@
+.collapsible-header:hover{
+    background-color: #26a69a;
+    color: #fff;
+    transition: ease .2s;
+}
+
+.collapsible-header{
+    transition: ease .2s;
+}
+
+li.active .collapsible-header{
+    background-color: #26a69a;
+    color: #fff;
+}
