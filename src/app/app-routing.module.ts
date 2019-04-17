@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { CanvasComponent } from './components/canvas/canvas.component';
 import { ProjectsComponent } from './components/projects/projects.component';
+import { SupplierComponent } from './components/supplier/supplier.component';
 
 const routes: Routes = [
   { 
@@ -14,6 +15,11 @@ const routes: Routes = [
   {
     path: 'projects',
     component: ProjectsComponent
+    // loadChildren: './lazy-loading/projects/projects.module#ProjectsModule'
+  },
+  {
+    path: 'suppliers',
+    component: SupplierComponent
     // loadChildren: './lazy-loading/projects/projects.module#ProjectsModule'
   }
 ];

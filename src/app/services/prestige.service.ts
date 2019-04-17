@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FirebaseService } from '../services/firebase.service';
 import { MaterializeService } from '../services/materialize.service';
+import { element } from '@angular/core/src/render3';
  
 @Injectable({
   providedIn: 'root'
@@ -98,6 +99,10 @@ export class PrestigeService {
   projectList: Array<any> = [];
   projects_materialList: Array<any> = [];
 /////////////////////////////// projects
+
+///////////////////////////////supplier
+  poList: Array<object> = [];
+///////////////////////////////supplier
   constructor(private fb: FirebaseService, public M: MaterializeService) { }
 
   // CANVAS
@@ -277,22 +282,21 @@ export class PrestigeService {
 
       this.projectList.forEach(x => {
 
-        
-
         this.fb.retrieveWithCondition('tblpo', 'projectKey', x.key)
         .subscribe((res) => {
           let arr= [];
           let total = 0;
           res.forEach(element => {
             let z = element.payload.toJSON();
-
-            console.log(z.po)
             let poArr = [];
             let subTotal = 0;
 
             Object.keys(z.po).map((key) => {
+              console.log(z.po[key])
+              z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
               poArr.unshift((z.po[key]))
-              subTotal+= z.po[key].price;
+              
+              subTotal+= (z.po[key].price * z.po[key].qty);
             });
 
             total += subTotal;
@@ -301,7 +305,8 @@ export class PrestigeService {
               po: poArr,
               poKey: element.key,
               date: z.date,
-              subTotal: subTotal
+              subTotal: subTotal,
+              paid: z.paid
             });
 
           });
@@ -362,7 +367,8 @@ export class PrestigeService {
       po: data,
       projectKey: projectKey,
       supplier: data[0].supplier,
-      date: date
+      date: date,
+      paid: false
     })
     .then( () => {
       console.log('added')
@@ -371,8 +377,70 @@ export class PrestigeService {
       this.projects_materialList.forEach(x => {
         x['isShow'] = true;
         x['isCheck'] = true;
+        x['qty'] = null;
       })
     })
   }
+
+  payPO(key) {
+    console.log(key)
+    this.fb.edit('tblpo', key, {paid: true})
+    .then( () => {
+      console.log('success')
+      this.M.toastDismiss();
+    });
+  }
   // PROJECT
+
+
+  // SUPPLIER
+  getPOUsingSupplier(supplier){
+    this.fb.retrieveWithCondition('tblpo', 'supplier', supplier)
+    .subscribe( res => {
+      this.poList = [];
+      let total = 0;
+      let balance = 0;
+
+      res.forEach(element => {
+        let z = element.payload.toJSON();
+        let poArr = [];
+        let subTotal = 0;
+
+        Object.keys(z.po).map((key) => {
+          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+          poArr.unshift((z.po[key]))
+          subTotal+= (z.po[key].price * z.po[key].qty);
+          // console.log(z.po[key].paid)
+          // z.po[key].paid ? '' : console.log('unpaid');
+
+        });
+        balance+= z.paid ? 0 :  subTotal;
+        total += subTotal;
+
+        this.fb.retrieve(`tblprojects/${z.projectKey}`)
+        .subscribe( project => {
+
+          this.poList.unshift({
+            po: poArr,
+            poKey: element.key,
+            date: z.date,
+            subTotal: subTotal,
+            paid: z.paid,
+            projectName: project[0].payload.toJSON()
+          });
+          
+        })
+
+        
+
+      });
+      this.poList['total'] = total;
+      this.poList['balance'] = balance;
+      
+
+      console.log(this.poList)
+
+    })
+  }
+  // SUPPLIER
 }

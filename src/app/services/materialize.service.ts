@@ -20,5 +20,11 @@ export class MaterializeService {
   toast(text): void{
     M.toast({html: text})
   }
+
+  toastDismiss(): void{
+    var toastElement = document.querySelector('.toast');
+    var toastInstance = M.Toast.getInstance(toastElement);
+    toastInstance.dismiss();
+  }
   
 }

@@ -8,6 +8,10 @@ import { PrestigeService } from '../../services/prestige.service';
 })
 export class ProjectsTableComponent implements OnInit {
   projectKey: any;
+  poClass = {
+    paid: 'teal disabled',
+    unpaid: 'red pulse'
+  }
   constructor(public prestige: PrestigeService) { }
  
   ngOnInit() {
@@ -26,5 +30,4 @@ export class ProjectsTableComponent implements OnInit {
   onSelectSupplier(supplier){
     console.log(supplier)
   }
-
 }

@@ -1,0 +1,15 @@
+.marginBottom {
+    margin-bottom: 60px;
+}
+
+.btn-large {
+    font-size: 24px;
+}
+
+.btn-large span{
+    font-size: 30px;
+}
+
+.btn-large:hover{
+    cursor: default;
+}

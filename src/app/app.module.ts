@@ -19,6 +19,8 @@ import { CanvasAddComponent } from './components/canvas-add/canvas-add.component
 import { ModalUpdateComponent } from './components/modal-update/modal-update.component';
 import { ModalDeleteComponent } from './components/modal-delete/modal-delete.component';
 import { ProjectsComponent } from './components/projects/projects.component';
+import { SupplierComponent } from './components/supplier/supplier.component';
+import { PoListComponent } from './components/po-list/po-list.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +36,9 @@ import { ProjectsComponent } from './components/projects/projects.component';
     CanvasAddComponent,
     ModalUpdateComponent,
     ModalDeleteComponent,
-    ProjectsComponent
+    ProjectsComponent,
+    SupplierComponent,
+    PoListComponent
   ],
   imports: [
     BrowserModule,

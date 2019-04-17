@@ -1,0 +1,79 @@
+<div class="marginBottom">
+  <div class="row">
+    <div class="col s6 input-field">
+      <p>Supplier</p>
+      <app-dropdown-color (color)="onSelectSupplier($event)" 
+      [dropdownData]="prestige.dropdownSupplier"></app-dropdown-color>
+    </div>
+  </div>
+  <div class="row">
+      <div class="progress" *ngIf="prestige.poList.length == 0 && isShow == true">
+          <div class="indeterminate"></div>
+      </div>
+    <app-po-list [poList]="prestige.poList"></app-po-list>
+  </div>
+  <div class="row">
+    <h4 class="center-align" *ngIf="prestige.poList.length != 0 && prestige.poList.balance !=0">
+      <a class="btn-large red pulse">BALANCE: <span>{{prestige.poList.balance | currency:'&#x20B1;'}}</span></a>
+    </h4>
+  </div>
+  <div class="row" *ngIf="prestige.poList.length != 0">
+    <div class="col s12 right-align">
+      <a class="btn waves-effect" (click)="onClickPrint(prestige.poList)">print <i class="material-icons right">print</i></a>
+    </div>
+  </div>
+  
+</div>
+
+<div id="print" class="hide" style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+  <div *ngFor="let po of prestige.poList" style="margin-bottom: 100px">
+      <p style="page-break-before: always" *ngIf="po.po.length > 5"></p>
+      <div style="text-align: center">
+          <p>
+            <b>PRESTIGE GLASS AND ALUMINUM SUPPLY</b> <br>
+            262 DEL MONTE AVE QUEZON CITY <br>
+            TELEFAX: 423-5918
+          </p>
+      </div>
+      <hr>
+      <div style="margin-top: 20px">
+        <p style="text-align: center">PURCHASE ORDER</p>
+        <p style="overflow: hidden; margin-top: 20px">
+          <span style="float:left;">DATE: {{po.date}}</span>
+          <span style="float:right;">PO #: {{po.poKey}}</span>
+        </p>
+        <p>SUPPLIER: GLASSPLANET</p>
+        <p style="text-align: center">Project: {{po.projectName}}</p>
+      </div>
+    
+      <table border="1" cellpadding="3" style="width: 100%; text-align: center">
+        <thead>
+          <tr>
+            <th>QTY</th>
+            <th></th>		
+            <th></th>
+            <th>PRICE/UNIT</th>
+            <th>AMOUNT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of po.po">
+            <td>{{ p.qty}}</td>
+            <td></td>
+            <td>{{ p.materialName}}</td>
+            <td>{{ p.price}}</td>
+            <td>{{ p.subtotal}}</td>
+          </tr>     
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>TOTAL:</td>
+            <td>{{po.subTotal | currency:'&#x20B1;'}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="page-break-before: always" *ngIf="po.po.length > 5 "></p>
+  </div>
+
+</div>
