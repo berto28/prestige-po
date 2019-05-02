@@ -1,0 +1,117 @@
+
+<div id="print" class="hide" style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+    <div *ngFor="let po of printPO; let i = index" style="margin-bottom: 100px">
+        <ng-container *ngIf="po.po.length > 5 ">
+            <p style="page-break-before: always" ></p>
+        </ng-container>
+       <div style="margin-bottom: 70px">
+          <div style="text-align: center; position: relative; border-bottom: 5px solid blue">
+            <img [src]="logo" alt="" style="position: absolute; top: -5px; left: 50px;">
+              <p>
+                <b>PRESTIGE GLASS AND ALUMINUM SUPPLY</b> <br>
+                262 DEL MONTE AVE QUEZON CITY <br>
+                TELEFAX: 423-5918
+              </p>
+          </div>
+          <!-- <hr style="color:black"> -->
+          <div style="margin-top: 20px">
+            <p style="text-align: center">PURCHASE ORDER</p>
+            <p style="overflow: hidden; margin-top: 20px">
+              <span style="float:left;">DATE: {{po.date}}</span>
+              <span style="float:right;">PO #: {{po.poKey}}</span>
+            </p>
+            <p>SUPPLIER: {{ po.po[0].supplier }}</p>
+            <p style="text-align: center">Project: {{po.projectName}}</p>
+          </div>
+        
+          <table border="1" cellpadding="3" style="width: 100%; text-align: center; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>QTY</th>
+                <th></th>		
+                <th></th>
+                <th>PRICE/UNIT</th>
+                <th>AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of po.po">
+                <td>{{ p.qty}}</td>
+                <td></td>
+                <td>{{ p.materialName}}</td>
+                <td>{{ p.price}}</td>
+                <td>{{ p.subtotal}}</td>
+              </tr>     
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>TOTAL:</td>
+                <td>{{po.subTotal | currency:'&#x20B1;'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-container *ngIf="po.po.length > 5 ">
+            <p style="page-break-before: always" ></p>
+        </ng-container>
+        <div style="margin-bottoml: 70px">
+          <div style="text-align: center; position: relative; border-bottom: 5px solid yellow">
+            <img [src]="logo" alt="" style="position: absolute; top: -5px; left: 50px;">
+              <p>
+                <b>PRESTIGE GLASS AND ALUMINUM SUPPLY</b> <br>
+                262 DEL MONTE AVE QUEZON CITY <br>
+                TELEFAX: 423-5918
+              </p>
+          </div>
+          <!-- <hr style="color:black"> -->
+          <div style="margin-top: 20px">
+            <p style="text-align: center">PURCHASE ORDER</p>
+            <p style="overflow: hidden; margin-top: 20px">
+              <span style="float:left;">DATE: {{po.date}}</span>
+              <span style="float:right;">PO #: {{po.poKey}}</span>
+            </p>
+            <p>SUPPLIER: {{ po.po[0].supplier }}</p>
+            <p style="text-align: center">Project: {{po.projectName}}</p>
+          </div>
+        
+          <table border="1" cellpadding="3" style="width: 100%; text-align: center; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>QTY</th>
+                <th></th>		
+                <th></th>
+                <th>PRICE/UNIT</th>
+                <th>AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of po.po">
+                <td>{{ p.qty}}</td>
+                <td></td>
+                <td>{{ p.materialName}}</td>
+                <td>{{ p.price}}</td>
+                <td>{{ p.subtotal}}</td>
+              </tr>     
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>TOTAL:</td>
+                <td>{{po.subTotal | currency:'&#x20B1;'}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+          
+        
+            <!-- <ng-container *ngIf="po.po.length > 6 "> -->
+          <p style="page-break-before: always" ></p>
+            <!-- </ng-container> -->
+            <!-- <ng-container *ngIf="po.po.length < 6 ">
+                <p style="page-break-before: always" *ngIf="(i+1) % 2 == 0"></p>
+            </ng-container> -->
+        
+    </div>
+  
+  </div>

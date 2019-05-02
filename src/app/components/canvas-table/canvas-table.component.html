@@ -22,7 +22,7 @@
 
         <tbody in-view-container>
           
-          <tr *ngFor="let m of prestige.materialList | slice:fromStart:toEnd">
+          <tr *ngFor="let m of prestige.materialList | slice:startFrom:toEnd">
             <td>{{ m.supplier }}</td>
             <td>{{ m.section }}</td>
             <td>{{ m.color }}</td>

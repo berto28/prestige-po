@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PrestigeService} from './services/prestige.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,11 @@ export class AppComponent {
   title = 'prestige-app';
   pageTitle: string;
 
+  constructor(public prestige: PrestigeService){
+  }
+  
   savePageTitle(title):void {
-    this.pageTitle = title;
+    // this.pageTitle = title;
+    
   }
 }

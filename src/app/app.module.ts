@@ -21,6 +21,14 @@ import { ModalDeleteComponent } from './components/modal-delete/modal-delete.com
 import { ProjectsComponent } from './components/projects/projects.component';
 import { SupplierComponent } from './components/supplier/supplier.component';
 import { PoListComponent } from './components/po-list/po-list.component';
+import { PrintPoComponent } from './components/print-po/print-po.component';
+import { PurchasesComponent } from './components/purchases/purchases.component';
+import { StocksComponent } from './components/stocks/stocks.component';
+import { ModalAddStockComponent } from './components/modal-add-stock/modal-add-stock.component';
+import { StocksTableComponent } from './components/stocks-table/stocks-table.component';
+import { ModalPayComponent } from './components/modal-pay/modal-pay.component';
+import { ModalViewScrapComponent } from './components/modal-view-scrap/modal-view-scrap.component';
+import { ModalCuttingListComponent } from './components/modal-cutting-list/modal-cutting-list.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +46,15 @@ import { PoListComponent } from './components/po-list/po-list.component';
     ModalDeleteComponent,
     ProjectsComponent,
     SupplierComponent,
-    PoListComponent
+    PoListComponent,
+    PrintPoComponent,
+    PurchasesComponent,
+    StocksComponent,
+    ModalAddStockComponent,
+    StocksTableComponent,
+    ModalPayComponent,
+    ModalViewScrapComponent,
+    ModalCuttingListComponent
   ],
   imports: [
     BrowserModule,

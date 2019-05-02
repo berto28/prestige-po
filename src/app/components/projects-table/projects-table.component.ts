@@ -11,7 +11,9 @@ export class ProjectsTableComponent implements OnInit {
   poClass = {
     paid: 'teal disabled',
     unpaid: 'red pulse'
-  }
+  };
+  printPO: any;
+
   constructor(public prestige: PrestigeService) { }
  
   ngOnInit() {
@@ -29,5 +31,22 @@ export class ProjectsTableComponent implements OnInit {
 
   onSelectSupplier(supplier){
     console.log(supplier)
+  }
+
+  onClickPrint(po){
+
+    this.printPO = po;
+   
+    console.log(this.printPO);
+
+    setTimeout( function() {
+      let print = document.getElementById('print');
+      let newWin= window.open("");
+      newWin.document.write(print.outerHTML);
+      newWin.print();
+      newWin.close();
+    }, 0)
+    
+    
   }
 }

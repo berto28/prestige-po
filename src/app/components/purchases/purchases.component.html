@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="col s12">
+        <input type="text" class="datepicker teal-text" placeholder="Filter PO (choose date)"
+        (change)="onChangeDate($event)">
+    </div>
+   
+</div>
+<div class="row">
+    <div class="progress" *ngIf="prestige.purchases_poList.length == 0">
+        <div class="indeterminate"></div>
+    </div>
+    <div class="col s12">
+        <!-- <app-po-list [poList]="prestige.purchases_poList"></app-po-list> -->
+        <div class="card">
+            <div class="card-content">
+                <table class="centered highlight">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>PO#</th>
+                            <th>PROJECT NAME</th>
+                            <th>SUPPLIER</th>
+                            <th>TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngFor="let p of prestige.purchases_poList">
+                            <tr *ngIf="p.isShow">
+                                <td class="teal-text">{{ p.date }}</td>
+                                <td>{{ p.poKey }}</td>
+                                <td>{{ p.projectName }}</td>
+                                <td>{{ p.po[0].supplier }}</td>
+                                <td>{{ p.subTotal }}</td>
+                            </tr>
+                        </ng-container>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="teal-text"><b>Total:</b></td>
+                            <td class="teal-text"><b>{{prestige.purchases_poList.total | currency:'&#x20B1;'}}</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

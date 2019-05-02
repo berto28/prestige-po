@@ -1,0 +1,18 @@
+<div id="modalPay" class="modal">
+    <div class="modal-content">
+      <h4>By Check</h4>
+      <div class="row">
+        <div class="col s6 input-field" *ngIf="pay.paidBy == 'cash'">
+            <input type="text" class="datepicker" (change)="onChangeDate($event)">
+        </div>
+        <div class="input-field col s6">
+          <input [attr.id]="pay.field.id" type="text" [(ngModel)]="pay.field.value">
+          <label [attr.for]="pay.field.id">{{pay.field.label}}</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+      <a class="modal-close waves-effect waves-green btn-flat" (click)="onClickPay()">Pay</a>
+    </div>
+  </div>

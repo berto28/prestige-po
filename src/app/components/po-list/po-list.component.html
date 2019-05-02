@@ -1,48 +1,60 @@
-<div class="card" *ngFor="let po of poList">
-  <div class="card-content">
-    <span class="card-title teal-text"><b>PO #{{po.poKey}}</b> <span class="right">{{po.date}}</span></span>
-    <span class="card-title teal-text">{{po.projectName}}</span>
-    <table class="highlight centered">
-      <thead>
-        <tr>
-            <th>Supplier</th>
-            <th>Sesction</th>
-            <th>Item</th>
-            <th>Color</th>
-            <th>Price</th>
-            <th>QTY</th>
-            <th>Sub Total</th>
-        </tr>
-      </thead>
 
-      <tbody>
-        <tr *ngFor="let item of po['po']">
-          <td>{{ item.supplier }}</td>
-          <td>{{ item.section }}</td>
-          <td>{{ item.materialName }}</td>
-          <td>{{ item.color}}</td>
-          <td>{{ item.price }}</td>
-          <td>{{ item.qty }}</td>
-          <td>{{ item.subtotal}}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td class="teal-text"><b>Total:</b></td>
-          <td class="teal-text"><b> {{ po.subTotal }} </b></td>
-        </tr>
-      </tbody>
-    </table>
-    
+  <div class="card" *ngFor="let po of poList">
+    <ng-container *ngIf="po.isShow">
+      <div class="card-content">
+        <span class="card-title teal-text"><b>PO #{{po.poKey}}</b> <span class="right">{{po.date}}</span></span>
+        <span class="card-title teal-text">{{po.projectName}}</span>
+        <table class="highlight centered">
+          <thead>
+            <tr>
+                <th>Supplier</th>
+                <th>Sesction</th>
+                <th>Item</th>
+                <th>Color</th>
+                <th>Price</th>
+                <th>QTY</th>
+                <th *ngIf="po['po'][0].supplier == 'FROM STOCK'">Number of Set</th>
+                <th>Sub Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of po['po']">
+              <td>{{ item.supplier }}</td>
+              <td>{{ item.section }}</td>
+              <td>{{ item.materialName }}</td>
+              <td>{{ item.color}}</td>
+              <td>{{ item.price }}</td>
+              <td>{{ item.qty }}</td>
+              <td *ngIf="item.supplier == 'FROM STOCK'">{{ item.numberOfSet }}</td>
+              <td>{{ item.subtotal}}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td *ngIf="po['po'][0].supplier == 'FROM STOCK'"></td>
+              <td class="teal-text"><b>Total:</b></td>
+              <td class="teal-text"><b> {{ po.subTotal }} </b></td>
+            </tr>
+          </tbody>
+        </table>
+        
+      </div>
+      <div class="right-align">
+        <a *ngIf="po['po'][0].supplier != 'FROM STOCK'"
+        class="btn waves-effect" [ngClass]="po.paid? poClass.paid : poClass.unpaid"
+        (click)="onClickPayPO(po.poKey)">
+        <i class="material-icons right" *ngIf="po.paid">check</i>
+          <!-- {{po.paid ? 'Paid' : 'Unpaid' }} -->
+          {{ po.paid.paidBy == 'check' ? 
+             ('Paid by check#'+po.paid.check) :
+             po.paid.paidBy == 'cash' ?
+             ('Paid by Cash '+po.paid.date+ ' discount '+po.paid.discount+'%') : 
+             'Unpaid' }}
+        </a>
+      </div>
+  </ng-container>
   </div>
-  <div class="right-align">
-    <a class="btn waves-effect" [ngClass]="po.paid? poClass.paid : poClass.unpaid"
-    (click)="onClickPayPO(po.poKey)">
-    <i class="material-icons right" *ngIf="po.paid">check</i>
-      {{po.paid ? 'Paid' : 'Unpaid' }}
-    </a>
-  </div>
-</div>

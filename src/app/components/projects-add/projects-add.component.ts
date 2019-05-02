@@ -10,7 +10,9 @@ export class ProjectsAddComponent implements OnInit {
 
   txtProject: string;
   
-  constructor(public prestige: PrestigeService) { }
+  constructor(public prestige: PrestigeService) { 
+    prestige.url = 'Projects';
+  }
 
   ngOnInit() {
   }

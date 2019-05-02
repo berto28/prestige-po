@@ -26,6 +26,10 @@
           <div class="col s12">
             <h4>PO Total: {{p.total | currency:'&#x20B1;'}}</h4>
           </div>
+          <div class="right-align">
+              <a class="btn waves-effect waves-light" (click)="onClickPrint(p.po)">Print<i class="material-icons right">print</i></a>
+          </div>
+          
       </div>
     </li>
   </ul>
@@ -34,3 +38,5 @@
 </div>
 
 <app-modal-add-po [projectKey]="projectKey"></app-modal-add-po>
+
+<app-print-po [printPO]="printPO"></app-print-po>

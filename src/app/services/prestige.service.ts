@@ -8,8 +8,9 @@ import { element } from '@angular/core/src/render3';
 })
 export class PrestigeService {
 
+  url: string = 'Projects';
   //////////////////////////////// canvas
-  dropdownColor: object = {
+  dropdownColor: any = {
     target: 'dropdownColor',
     text:  'choose color',
     icon: 'color_lens',
@@ -18,7 +19,7 @@ export class PrestigeService {
     ]
   };
 
-  dropdownSection: object = {
+  dropdownSection: any = {
     target: 'dropdownSection',
     text: 'choose section',
     icon: 'clear_all',
@@ -44,7 +45,7 @@ export class PrestigeService {
     ]
   };
 
-  dropdownSupplier: object = {
+  dropdownSupplier: any = {
     target: 'dropdownSupplier',
     text: 'choose supplier',
     icon: 'airport_shuttle',
@@ -59,7 +60,7 @@ export class PrestigeService {
     ]
   };
 
-  maaterial_modalUpdateFields: object = {
+  maaterial_modalUpdateFields: any = {
     title: 'Update Item',
     key: '',
     fields: [
@@ -78,7 +79,7 @@ export class PrestigeService {
     ]
   };
 
-  _deleteModal: object = {
+  _deleteModal: any = {
     title: 'Delete',
     key: ''
   }
@@ -98,12 +99,57 @@ export class PrestigeService {
   project_isAdding: boolean = false;
   projectList: Array<any> = [];
   projects_materialList: Array<any> = [];
+  pay: any =  {
+    projectKey: '0',
+    paidBy: 'check',
+    field: {
+      id: 'checkNumber',
+      label: 'Check Number',
+      value: null
+    }
+  }
 /////////////////////////////// projects
 
 ///////////////////////////////supplier
-  poList: Array<object> = [];
+  poList: any= [];
+  isShowProgressSupplier: boolean = false;
+  clickSupplier: boolean = false;
+  supplierTotalPurchase: number = null;
 ///////////////////////////////supplier
+
+
+//////////////////////////////Purchases
+  purchases_poList: any = [];
+//////////////////////////////Purchases
+
+//////////////////////////////Stocks
+  stockList: any = [];
+  stocks_modalUpdateFields: any = {
+    title: 'Update Item',
+    key: '',
+    fields: [
+      {
+        target: 'priceUpdate',
+        label: 'Price',
+        type: 'number',
+        value: ''
+      },
+      {
+        target: 'qtyUpdate',
+        label: 'Qty',
+        type: 'number',
+        value: ''
+      }
+      
+    ]
+  };
+  progressStockstable: boolean = true;
+
+  scrapList: any = [];
+  //////////////////////////////Stocks
+
   constructor(private fb: FirebaseService, public M: MaterializeService) { }
+
 
   // CANVAS
   addCanvas(data): void{
@@ -139,13 +185,14 @@ export class PrestigeService {
       this.M.toast(`Item updated.`);
       this.dropdownColor['text'] = 'Choose Color';
       this.dropdownSection['text'] = 'Choose Section';
-      this.dropdownSupplier['text'] = 'Choose Section';
+      this.dropdownSupplier['text'] = 'Choose Supplier';
     })
   }
 
   deleteCanvas(data): void{
     this.fb.delete('tblmaterials', data.key)
     .then( () => {
+      this.M.toastDismiss();
       this.M.toast(`<span class="yellow-text">${data.materialName}</span>&nbsp;has been deleted.`);
     });
   }
@@ -288,16 +335,32 @@ export class PrestigeService {
           let total = 0;
           res.forEach(element => {
             let z = element.payload.toJSON();
+            console.log(z)
             let poArr = [];
             let subTotal = 0;
 
             Object.keys(z.po).map((key) => {
-              console.log(z.po[key])
-              z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
-              poArr.unshift((z.po[key]))
+
+              if(z.po[key].supplier == 'FROM STOCK'){
+                  z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+                  * z.po[key].numberOfSet;
+                  
+                  subTotal+= z.po[key]['subtotal'];
+                 console.log('from stock')
+              }
+              else{
+                z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+                subTotal+= z.po[key]['subtotal'];
+              }
               
-              subTotal+= (z.po[key].price * z.po[key].qty);
+              poArr.unshift((z.po[key]))
+
+              
             });
+
+            if(z.paid.paidBy == 'cash'){
+              subTotal -= subTotal * z.paid.discount;
+            }
 
             total += subTotal;
 
@@ -306,7 +369,9 @@ export class PrestigeService {
               poKey: element.key,
               date: z.date,
               subTotal: subTotal,
-              paid: z.paid
+              paid: z.paid,
+              projectName: x.name,
+              isShow: true
             });
 
           });
@@ -320,26 +385,31 @@ export class PrestigeService {
     });
   }
 
-  getMaterials(data, section, color){
-    this.projects_materialList = [];
-    
-    this.fb.retrieveWithCondition('tblmaterials', 'supplier', data)
-    .subscribe( (res) => {
+  getMaterials(supplier, section, color){
+    if(supplier != null){
       this.projects_materialList = [];
-      res.forEach(element => {
 
-        let x = element.payload.toJSON();
-        // x.section == data.section ? this.projects_materialList.unshift(x) : ''
-        x['isShow'] = true;
-        x['isCheck'] = true;
-        x['qty'] = null;
-        this.projects_materialList.unshift(x);
-        
+      this.fb.retrieveWithCondition('tblmaterials', 'supplier', supplier)
+      .subscribe( (res) => {
+        this.projects_materialList = [];
+        res.forEach(element => {
+
+          let x = element.payload.toJSON();
+          // x.section == data.section ? this.projects_materialList.unshift(x) : ''
+          x['isShow'] = true;
+          x['isCheck'] = true;
+          x['qty'] = null;
+          x['stockPrice'] = null;
+          x['type'] = null;
+          x['materialKey'] = element.payload.key;
+
+          this.projects_materialList.unshift(x);
+        })
+        // console.log(section, color)
+        console.log(this.projects_materialList)
+        this.sortMaterials(section, color)
       })
-      console.log(section, color)
-      console.log(this.projects_materialList)
-      this.sortMaterials(section, color)
-    })
+    }
   }
 
   sortMaterials(section, color){
@@ -360,9 +430,11 @@ export class PrestigeService {
     });
   }
 
-  addPO(data, projectKey, date){
-    console.log(data)
-    console.log(data[0].supplier)
+  addPO(data, projectKey, date, isFromStock){
+    // console.log(data)
+    // console.log(data[0].supplier)
+   
+    
     this.fb.add(`tblpo`, {
       po: data,
       projectKey: projectKey,
@@ -372,23 +444,266 @@ export class PrestigeService {
     })
     .then( () => {
       console.log('added')
-      this.M.toast('New PO has been added')
+      
 
+      if(isFromStock){
+          this.getScrap(data);
+        // data.forEach( d => {
+        //   this.fb.edit('tblstock', d.stockKey, { qty: (d.stock-d.qty)})
+        //   .then( () => {
+        //     console.log('updated qty');
+        //   });
+        // });
+
+        // this.stockList.forEach(x => {
+        //   x['isShow'] = true;
+        //   x['isCheck'] = true;
+        //   x['qty'] = null;
+        // });
+
+      }
+      this.M.toast('New PO has been added')
       this.projects_materialList.forEach(x => {
         x['isShow'] = true;
         x['isCheck'] = true;
         x['qty'] = null;
+      });
+
+    });
+
+  }
+
+  sortNumber(a,b) {
+      return a - b;
+  }
+
+  getScrap(data){
+    console.log(data);
+    
+    data.forEach( x => {
+      console.log(x)
+      this.refreshScrap(x, x.numberOfSet);     
+    });
+
+  }
+
+  refreshScrap(x, numberOfSet){
+    // const eventref = this.fb.retrieveWithCondition('tblscrap', 'stockKey', x.stockKey);
+          // const snapshot = await eventref.once('value');
+          // const value = snapshot.val();
+          this.fb.retrieveOnce('tblscrap', 'stockKey', x.stockKey).once('value', (r) => {
+            // this.fb.retrieveWithCondition('tblscrap', 'stockKey', x.stockKey).
+            // subscribe( res => {
+  
+              // console.log(res)
+  
+              // if(res.lenght == 0){
+              //     this.addScrap(x)
+              // }
+              // else{
+              //   let scrap = {
+              //     scrap: [],
+              //     scrapKey: []
+              //   };
+    
+              //   console.log(scrap);
+                
+              //   res.forEach( x => {
+              //     scrap.scrap.unshift(x.payload.toJSON().scrap);
+              //       scrap.scrapKey.unshift(x.payload.key);
+              //   })
+    
+              
+              //   let ctr = 0;
+    
+              //   console.log(x.numberOfSet);
+              //   let isNotAvailable = true;
+              //   for(let s of scrap.scrap) {
+              //     console.log(s)
+              //     if(s >= x.qty){
+                    
+              //       let newScrap = s - x.qty;
+              //       this.updateScrap(newScrap, scrap.scrapKey[ctr]);
+              //       isNotAvailable = false;
+              //       console.log('break');
+              //       break;
+              //     }
+              //     ctr+=1;
+              //   }
+              //   isNotAvailable == true ? this.addScrap(x) : '';
+    
+                
+              // }
+            console.log(r.toJSON())
+            let res = r.toJSON();
+            
+            if(res == null){
+              this.addScrap(x, numberOfSet)
+            }
+            else{
+              // let scrap = {
+              //   scrap: [],
+              //   scrapKey: []
+              // };
+  
+              let scrap = [];
+  
+              Object.keys(res).map((key) => {
+                // console.log(res[key])
+                scrap.unshift(
+                  {
+                    scrap: res[key].scrap,
+                    scrapKey: key
+                  }
+                )
+                // scrap.scrap.unshift(res[key].scrap);
+                // scrap.scrapKey.unshift(key);
+              });
+  
+              console.log(scrap);
+              
+              let isGetNewScrap = true;
+              let countFinishSet = 0;
+              
+              for(let i = 0; i < numberOfSet; i++){
+                // console.log(i)
+                let ctr = 0;
+                let isNotAvailable = true;
+              
+  
+                for(let s of scrap){
+                  isGetNewScrap = true;
+  
+                  if(s.scrap >= x.qty){
+                    let newScrap = s.scrap - x.qty;
+                    s.scrap = newScrap;
+                    // this.updateScrap(newScrap, scrap.scrapKey[ctr]);
+                    isNotAvailable = false;
+                    isGetNewScrap = false;
+                    countFinishSet+=1;
+                    break;
+  
+                  }
+                  ctr+=1;
+                };
+                // for(let s of scrap.scrap) {
+                //   // console.log(s)
+                //   if(s >= x.qty){
+                    
+                //     let newScrap = s - x.qty;
+                //     scrap.scrap[ctr] = newScrap;
+                //     // this.updateScrap(newScrap, scrap.scrapKey[ctr]);
+                //     isNotAvailable = false;
+                //     isGetNewScrap = false;
+                //     break;
+                //   }
+                //   ctr+=1;
+                // }
+                // isNotAvailable == true ? this.addScrap(x) : '';
+              }
+              console.log(scrap)
+              this.updateScrap(scrap, isGetNewScrap, x, (numberOfSet - countFinishSet));
+              isGetNewScrap ? console.log('get new item') : '';
+              
+            }
+          });
+  }
+
+  updateScrap(data, isGetNewScrap, item, numberOfSet){
+    console.log(data);
+    let len = data.length;
+    let ctr = 0;
+    data.forEach(d => {
+     
+
+      this.fb.edit(`tblscrap`, d.scrapKey ,{
+        scrap: d.scrap
       })
+      .then( () => {
+        ctr+=1;
+        console.log(len +' == ' + ctr)
+        isGetNewScrap && ctr == len ? this.addScrap(item, numberOfSet) : '';
+        // this.stockList.forEach(x => {
+        //   x['isShow'] = true;
+        //   x['isCheck'] = true;
+        //   x['qty'] = null;
+        // });
+      });
     })
   }
 
-  payPO(key) {
-    console.log(key)
-    this.fb.edit('tblpo', key, {paid: true})
-    .then( () => {
-      console.log('success')
-      this.M.toastDismiss();
-    });
+  addScrap(data, numberOfSet){
+    console.log(data)
+
+    if(data.stock > 0){
+      
+      console.log('pumasok ba?')
+      this.fb.add('tblscrap', {
+        scrap: data.baseSize,
+        stockKey: data.stockKey
+      }).then( () => {
+        console.log('Added new Scrap')
+        data.stock-=1;
+        this.fb.edit('tblstock', data.stockKey, {
+          qty: data.stock
+        })
+        .then( () =>{
+          console.log('-1 from stock')
+          this.refreshScrap(data, numberOfSet);
+        })
+       
+      });
+
+    }
+    else{
+      this.M.toast(`<span class="yellow-text">${data.materialName} </span>&nbsp;insufficient stock or scrap`);
+    }
+  }
+
+  
+
+  payPO(data) {
+    if(data.paidBy == 'check'){
+      if(data.field.value == '' || data.field.value == null){
+        this.M.toast('CHECK NUMBER is required');
+      }
+      else{
+        this.fb.edit('tblpo', data.projectKey, {
+          paid:{
+            isPaid: true,
+            paidBy: data.paidBy,
+            check: data.field.value
+          }
+        })
+        .then( () => {
+          console.log('success');
+        });
+      } 
+    }
+    else{
+      if(data.field.value == '' || data.field.value == null || data.date == null){
+        this.M.toast('DATE and DISCOUNT is required');
+      }
+      else{
+        this.fb.edit('tblpo', data.projectKey, {
+          paid:{
+            isPaid: true,
+            paidBy: data.paidBy,
+            date: data.date,
+            discount: '.'+data.field.value
+          }
+        })
+        .then( () => {
+          console.log('success');
+        });
+      }
+    }
+    // console.log(key)
+    // this.fb.edit('tblpo', key, {paid: true})
+    // .then( () => {
+    //   console.log('success')
+    //   this.M.toastDismiss();
+    // });
   }
   // PROJECT
 
@@ -408,12 +723,27 @@ export class PrestigeService {
 
         Object.keys(z.po).map((key) => {
           z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
-          poArr.unshift((z.po[key]))
-          subTotal+= (z.po[key].price * z.po[key].qty);
-          // console.log(z.po[key].paid)
-          // z.po[key].paid ? '' : console.log('unpaid');
+          
+          
+          if(z.po[key].supplier == 'FROM STOCK'){
+            z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+            * z.po[key].numberOfSet;
+            
+              subTotal+= z.po[key]['subtotal'];
+            console.log('from stock')
+          }
+          else{
+            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+            subTotal+= z.po[key]['subtotal'];
+          }
 
+          poArr.unshift((z.po[key]))
         });
+
+        if(z.paid.paidBy == 'cash'){
+          subTotal -= subTotal * z.paid.discount;
+        }
+
         balance+= z.paid ? 0 :  subTotal;
         total += subTotal;
 
@@ -426,7 +756,8 @@ export class PrestigeService {
             date: z.date,
             subTotal: subTotal,
             paid: z.paid,
-            projectName: project[0].payload.toJSON()
+            projectName: project[0].payload.toJSON(),
+            isShow: true
           });
           
         })
@@ -434,13 +765,250 @@ export class PrestigeService {
         
 
       });
+      this.isShowProgressSupplier = false;
+      this.supplierTotalPurchase = total;
       this.poList['total'] = total;
       this.poList['balance'] = balance;
-      
-
-      console.log(this.poList)
+      console.log(this.poList);
 
     })
   }
   // SUPPLIER
+
+  // PURCHASES
+  getAllPO(){
+    this.fb.retrieve('tblpo')
+    .subscribe( res => {
+      this.purchases_poList = [];
+      let total = 0;
+      let balance = 0;
+
+      res.forEach(element => {
+        let z = element.payload.toJSON();
+        let poArr = [];
+        let subTotal = 0;
+
+        Object.keys(z.po).map((key) => {
+          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+
+          if(z.po[key].supplier == 'FROM STOCK'){
+            z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+            * z.po[key].numberOfSet;
+            
+              subTotal+= z.po[key]['subtotal'];
+            console.log('from stock')
+          }
+          else{
+            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+            subTotal+= z.po[key]['subtotal'];
+          }
+
+          poArr.unshift((z.po[key]))
+
+
+        });
+        if(z.paid.paidBy == 'cash'){
+          subTotal -= subTotal * z.paid.discount;
+        }
+
+        balance+= z.paid ? 0 :  subTotal;
+        total += subTotal;
+
+        this.fb.retrieve(`tblprojects/${z.projectKey}`)
+        .subscribe( project => {
+
+          this.purchases_poList.unshift({
+            po: poArr,
+            poKey: element.key,
+            date: z.date,
+            subTotal: subTotal,
+            paid: z.paid,
+            projectName: project[0].payload.toJSON(),
+            isShow: true
+          });
+          
+        });
+
+      });
+
+      this.purchases_poList['total'] = total;
+      this.purchases_poList['balance'] = balance;
+
+      console.log(this.purchases_poList)
+    })
+  }
+
+  filterPO(mm, yy){
+    let total = 0;
+
+    this.purchases_poList.forEach( po => {
+      
+      console.log(po.date.split('/'))
+      po.isShow = po.date.split('/')[0] == mm && po.date.split('/')[2] == yy ? true : false;
+      total+= po.isShow ? po.subTotal : 0;
+    });
+    this.purchases_poList.total = total;
+    console.log(this.purchases_poList)
+  }
+  // PURCHASES
+
+  // STOCK
+  addStock(data, date){
+    // console.log(data)
+    data.forEach( x => {
+     this.fb.add('tblstock',{
+      materialKey: x.materialKey,
+      price: x.price,
+      qty: x.qty,
+      baseLength: 252
+     }).then(() => {
+        this.M.toast(`
+          <span class="green-text">${x.materialName}</span>&nbsp;material has been addedd to stock.
+        `);
+        x['isShow'] = true;
+        x['isCheck'] = true;
+        x['qty'] = null;
+        x['stockPrice'] = null;
+     });
+
+    });
+  }
+
+  viewScrap(key){
+    
+   
+    this.fb.retrieveOnce('tblscrap', 'stockKey', key).once('value', r => {
+      let res = r.toJSON();
+      Object.keys(res).map((key) => {
+        // console.log(res[key])
+        console.log(res[key])
+        
+        // scrap.scrap.unshift(res[key].scrap);
+        // scrap.scrapKey.unshift(key);
+        if(res[key].scrap == 0){
+          this.fb.delete('tblscrap', key );
+        }
+        else{
+          this.M.toast(res[key].scrap+'in')
+        }
+      });
+    });
+    // .subscribe( res => {
+      
+    //   res.forEach( x => {
+    //     console.log(x.payload.toJSON())
+
+    //     if(x.payload.toJSON().scrap > 0){
+    //       // this.M.toastDismiss();
+          
+    //     }
+        
+    //   })
+
+    // })
+  }
+
+  getStockMaterials(section, color){
+    this.fb.retrieve('tblstock')
+    .subscribe(res => {
+      this.stockList = [];
+      res.forEach( x => {
+        let materialkey = x.payload.toJSON().materialKey;
+        let materialObj = {};
+
+        this.fb.retrieve(`tblmaterials/${materialkey}`)
+        .subscribe(m => {
+          
+          materialObj['color'] = m[0].payload.toJSON();
+          materialObj['materialName'] = m[1].payload.toJSON();
+          materialObj['section'] = m[3].payload.toJSON();
+          materialObj['supplier'] = 'FROM STOCK';
+        })
+
+        materialObj['isShow'] = true;
+        materialObj['isCheck'] = true;
+        materialObj['qty'] = null;
+        materialObj['stockPrice'] = null;
+        materialObj['stockKey'] = x.payload.key;
+        materialObj['baseSize'] = x.payload.toJSON().baseLength;
+        materialObj['type'] = x.payload.toJSON().type;
+        materialObj['price'] = x.payload.toJSON().price;
+        materialObj['stock'] = x.payload.toJSON().qty;
+        materialObj['numberOfSet'] = null;
+        materialObj['numberOfStock'] = x.payload.toJSON().qty;
+
+        this.stockList.unshift(materialObj);
+        
+      });
+      console.log(this.stockList)
+      let wew = this;
+      setTimeout( function() {
+        wew.sortMaterialsStock(section, color);
+        wew.progressStockstable = false;
+      }, 0)
+      
+    });
+  }
+
+  updateStock(data){
+    let obj = {
+      price: data.fields[0].value,
+      qty: data.fields[1].value
+    }
+    console.log(obj)
+    this.fb.edit('tblstock', data.key, obj)
+    .then( () => {
+      this.M.toast(`Item updated.`);
+    })
+  }
+
+  deleteStock(data){
+    this.fb.delete('tblstock', data.stockKey)
+    .then( () => {
+      this.M.toastDismiss();
+      this.M.toast(`<span class="yellow-text">${data.materialName}</span>&nbsp;has been deleted.`);
+    });
+  }
+
+  sortMaterialsStock(section, color){
+  
+
+    this.stockList.forEach( m =>  {
+
+      if(section != null && color == null){
+        m.isShow = m.section == section ? true : false;
+      }
+      else if(section == null && color != null){
+        m.isShow = m.color == color ? true : false;
+      }
+      else if(section != null && color != null){
+        m.isShow = section == m.section && color == m.color ? true : false;
+      }
+
+    });
+
+    console.log(this.stockList)
+  }
+
+  getScrapUsingMaterial(data){
+
+    this.fb.retrieveWithCondition('tblscrap', 'stockKey', data.stockKey)
+    .subscribe( res => {
+      
+      this.scrapList = [];
+
+      res.forEach( element => {
+
+        this.scrapList.unshift({
+          materialName: data.materialName,
+          color: data.color,
+          scrap: element.payload.toJSON().scrap
+        });
+        
+      });
+
+      console.log(this.scrapList)
+    });
+  }
+  // STOCK
 }

@@ -23,10 +23,8 @@ export class CanvasTableComponent implements OnInit {
       var d = document.documentElement;
       var offset = d.scrollTop + window.innerHeight;
       var height = d.offsetHeight;
-    
-      if (offset === height) {
-        console.log('At the bottom');
-        this.startFrom+=20;
+     
+      if (offset >= height) {
         this.toEnd+=20;
       }
     };
@@ -49,7 +47,7 @@ export class CanvasTableComponent implements OnInit {
     </span><button id="${material.key}" class="btn-flat toast-action" >Delete</button>`;
     this.prestige.M.toast(toastHTML);
     document.querySelector(`.toast #${material.key}`).addEventListener('click', (event)=> {
-      // M.Toast.dismissAll();
+      this.prestige.M.toastDismiss();
       this.prestige.deleteCanvas(material);
     });
   }

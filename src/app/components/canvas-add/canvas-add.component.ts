@@ -17,6 +17,7 @@ export class CanvasAddComponent implements OnInit {
 
   constructor(public prestige: PrestigeService,
               public materialService: MaterializeService) {
+    prestige.url = 'Canvas';
   }
  
   ngOnInit() {
@@ -62,18 +63,18 @@ export class CanvasAddComponent implements OnInit {
 
         let toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>NAME</b></span>&nbspshould not be blank`;
         isProceed = element['name'] == '' || element['name'] == null ? false : true;
-        
+    
         isProceed ? '' : this.materialService.toast(toastMessage);
 
         toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>Price</b></span>&nbspshould not be 0 or blank`;
-        isProceed =  element['price'] == null ? false : true;
-
+        // isProceed = element['price'] == '' || element['price'] == null ? false : true;
+        
         isProceed ? '' : this.materialService.toast(toastMessage);
 
         ctr+=1;
       });
 
-      isProceed  ? this.saveMaterial() : false ;
+      isProceed == true  ? this.saveMaterial() : false ;
   }
 
   saveMaterial(){

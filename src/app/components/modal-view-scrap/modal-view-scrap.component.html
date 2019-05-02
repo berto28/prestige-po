@@ -1,0 +1,29 @@
+<div id="modalViewScrap" class="modal">
+    <div class="modal-content">
+      <h4>Scraps</h4>
+      <div class="row">
+        <div class="col s12">
+            <table class="highlight">
+                <thead>
+                  <tr>
+                    <th>Material Name</th>
+                    <th>Color</th>
+                    <th>Scrap</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  <tr *ngFor="let s of prestige.scrapList">
+                    <td>{{ s.materialName }}</td>
+                    <td>{{ s.color }}</td>
+                    <td>{{ s.scrap }}in</td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close waves-effect waves-green btn-flat">close</a>
+    </div>
+  </div>

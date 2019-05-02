@@ -1,0 +1,8 @@
+.modal{
+    width: 64%;
+    min-height: 400px;
+}
+
+.modal-content{
+    height: 400px;
+}

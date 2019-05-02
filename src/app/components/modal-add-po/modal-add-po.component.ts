@@ -12,24 +12,37 @@ export class ModalAddPoComponent implements OnInit {
 
   supplierPick: string = null;
   colorPick: any = null;
-  sectionPick: string;
+  sectionPick: string = null;
   isRadioCheck: Array<any> = [false, false, false];
+  switch: boolean = false;
 
-
-  constructor(public prestige: PrestigeService) { }
+  constructor(public prestige: PrestigeService) { 
+    console.log(this.projectKey)
+    this.prestige.dropdownSection.text = 'choose a section';
+    this.prestige.dropdownSupplier.text = 'choose a supplier';
+    this.prestige.stockList = [];
+    this.prestige.projects_materialList = [];
+  }
 
   ngOnInit() {
-    console.log(this.projectKey)
+    
   }
 
   onSelectSupplier(supplier){
     console.log(supplier)
     this.supplierPick = supplier;
-    this.supplierPick != undefined ? this.getMaterials() : '';
+    
+    this.getMaterials();
+    // this.supplierPick != null ? 
+    // this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
+    // this.getMaterials() : '';
+    
   }
 
   onSelectSection(section){
     this.sectionPick = section;
+    // this.sectionPick != undefined ? this.getMaterials() : '';
+    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
     this.prestige.sortMaterials(this.sectionPick, this.colorPick);
   }
 
@@ -47,21 +60,37 @@ export class ModalAddPoComponent implements OnInit {
     }
     this.isRadioCheck[i] = true;
 
-    this.prestige.sortMaterials(this.sectionPick, this.colorPick)
+    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick);
    
   }
 
   onClickCheckBox(m, evt){
     evt.preventDefault();
-    m.isCheck = !m.isCheck;
+
+    // if(this.switch){
+    //   m.isCheck =  m.stock > 0 ? !m.isCheck : m.isCheck;
+    // }
+    // else{
+      m.isCheck = !m.isCheck;
+    // }
+
+   
   }
 
   onClickSavePO(){
     let jsonArray = [];
 
-    this.prestige.projects_materialList.forEach( el => {
-      el.isCheck != true ? jsonArray.unshift(el) : '\n';
-    })
+    if(this.switch){
+      this.prestige.stockList.forEach( el => {
+        el.isCheck != true ? jsonArray.unshift(el) : '\n';
+      })
+    }
+    else{
+      this.prestige.projects_materialList.forEach( el => {
+        el.isCheck != true ? jsonArray.unshift(el) : '\n';
+      })
+    }
 
     let today = new Date();
     let dd = String(today.getDate()).padStart(2, '0');
@@ -72,6 +101,13 @@ export class ModalAddPoComponent implements OnInit {
     console.log(jsonArray)
     
     let proceed = true;
+
+    proceed = jsonArray.length == 0 ? false : true;
+
+    if(proceed == false){
+      this.prestige.M.toast(`Choose Material First`);
+    }
+
     jsonArray.forEach( x => {
       if(x.qty == null || x.qty < 1){
         proceed =  false;
@@ -80,6 +116,56 @@ export class ModalAddPoComponent implements OnInit {
         
     });
 
-    proceed ?  this.prestige.addPO(jsonArray, this.projectKey, date) : '';
+    if(!this.switch){
+      jsonArray.forEach( x => {
+
+        jsonArray.forEach(y => {
+          if(x.supplier != y.supplier){
+            proceed = false;
+            
+          }
+        });
+  
+      });
+    }
+
+  //  proceed == false ? this.prestige.M.toast(`"SUPPLIER" should be the same.`): ''; 
+
+
+    proceed ?  this.prestige.addPO(jsonArray, this.projectKey, date, this.switch) : '';
+  }
+
+  onClickSwitch(evt){
+    evt.preventDefault();
+    this.switch = !this.switch;
+    this.switch ? this.prestige.getStockMaterials(this.sectionPick, this.colorPick) : this.getMaterials();
+   
+  }
+
+  onClickViewScrap(stockKey){
+    this.prestige.viewScrap(stockKey)
+  }
+
+  onChangeQty(m){
+    
+    if(this.switch){
+      // if(m.qty > m.stock){
+      //   m.numberOfStock = 0;
+      //   m.qty = m.stock;
+      // }
+      if(m.qty > 252){
+        // m.numberOfStock = 0;
+        m.qty = 252;
+      }
+      
+      // if(m.numberOfSet > m.stock){
+      //     m.numberOfStock = 0;
+      //     m.numberOfSet = m.stock;
+      // }
+      // else{
+      //   m.numberOfStock = m.stock - m.numberOfSet;
+      // }
+    }
+
   }
 }

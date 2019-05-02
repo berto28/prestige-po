@@ -1,0 +1,7 @@
+.modal{
+    max-height: 100%;
+}
+
+.modal.modal-fixed-footer {
+    height: 90%;
+}

@@ -18,13 +18,16 @@ export class FirebaseService {
     return this.fb.list(url).snapshotChanges();
   }
 
+
   retrieveWithCondition(url, key, value): any{
     return this.fb.list(url,(ref) => ref.orderByChild(key).equalTo(value)).snapshotChanges();
   }
 
+  retrieveOnce(url, key, value){
+    return this.fb.list(url,(ref) => ref.orderByChild(key).equalTo(value)).query;
+  }
+
   edit(url, key, data){
-    console.log(key)
-    console.log(data);
     return this.fb.list(url).update(key, data);
   }
 

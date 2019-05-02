@@ -10,8 +10,11 @@ import { PrestigeService } from '../../services/prestige.service';
 export class SupplierComponent implements OnInit {
   icon: string = "assets/ico_prestige.png";
   isShow: boolean = false;
-
-  constructor(public prestige: PrestigeService) { }
+  supplier: string;
+  
+  constructor(public prestige: PrestigeService) {
+    prestige.url = 'Suppliers';
+   }
 
   ngOnInit() {
     this.prestige.M.init();
@@ -19,18 +22,21 @@ export class SupplierComponent implements OnInit {
   }
 
   onSelectSupplier(supplier) {
-    this.isShow = true
+    this.prestige.isShowProgressSupplier = true;
+    this.supplier = supplier;
     this.prestige.getPOUsingSupplier(supplier);
   }
 
   onClickPrint(po){
     console.log(po)
     
-    let print = document.getElementById('print');
-    let newWin= window.open("");
-    newWin.document.write(print.outerHTML);
-    newWin.print();
-    newWin.close();
+    setTimeout( function() {
+      let print = document.getElementById('print');
+      let newWin= window.open("");
+      newWin.document.write(print.outerHTML);
+      newWin.print();
+      newWin.close();
+    }, 0)
   }
 
 }

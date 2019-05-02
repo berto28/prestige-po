@@ -3,5 +3,9 @@
 }
 
 .modal.modal-fixed-footer {
-    height: 80%;
+    height: 90%;
+}
+
+.badge {
+    cursor: pointer;
 }

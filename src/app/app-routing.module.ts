@@ -5,6 +5,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { CanvasComponent } from './components/canvas/canvas.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { SupplierComponent } from './components/supplier/supplier.component';
+import { PurchasesComponent } from './components/purchases/purchases.component';
+import { StocksComponent } from './components/stocks/stocks.component';
 
 const routes: Routes = [
   { 
@@ -21,6 +23,19 @@ const routes: Routes = [
     path: 'suppliers',
     component: SupplierComponent
     // loadChildren: './lazy-loading/projects/projects.module#ProjectsModule'
+  },
+  {
+    path: 'purchases',
+    component: PurchasesComponent
+    // loadChildren: './lazy-loading/projects/projects.module#ProjectsModule'
+  },
+  {
+    path: '',
+    component: ProjectsComponent
+  },
+  {
+    path: 'stocks',
+    component: StocksComponent
   }
 ];
 
@@ -28,7 +43,7 @@ const routes: Routes = [
   declarations: [],
   imports: [
     CommonModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes, { useHash: true })
   ],
   exports: [
     RouterModule
