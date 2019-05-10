@@ -19,6 +19,15 @@ export class PrestigeService {
     ]
   };
 
+  dropdownGlassType: any = {
+    target: 'dropdownColor',
+    text:  'choose glass type',
+    icon: 'color_lens',
+    arr: [
+      'TEMPERED', 'ANNEALED'
+    ]
+  };
+
   dropdownSection: any = {
     target: 'dropdownSection',
     text: 'choose section',
@@ -45,6 +54,20 @@ export class PrestigeService {
     ]
   };
 
+  dropdownSectionGlass: any = {
+    target: 'dropdownSection',
+    text: 'choose section',
+    icon: 'clear_all',
+    arr: [
+      'CLEAR',
+      'BROWN',
+      'TINTED',
+      'REFLECTIVE',
+      'SMOKE',
+      'MIRROR'
+    ]
+  };
+
   dropdownSupplier: any = {
     target: 'dropdownSupplier',
     text: 'choose supplier',
@@ -57,6 +80,32 @@ export class PrestigeService {
       'SJW',
       'DURATECH',
       'UNIFRAME'
+    ]
+  };
+
+  dropdownSupplierGlass: any = {
+    target: 'dropdownSupplier',
+    text: 'choose supplier',
+    icon: 'airport_shuttle',
+    arr: [
+      'GLASS PLANET',
+      'TQMP',
+      'WDG',
+      'VERTEX',
+      'CHAIN',
+      'SJW',
+      'TYPE ONE',
+      'TRANS'
+    ]
+  };
+
+  dropdownCutStyle: any = {
+    target: 'dropdownCutStyle',
+    text: 'choose cut style',
+    icon: 'content_cut',
+    arr: [
+     'HORIZONTAL',
+     'VERTICAL'
     ]
   };
 
@@ -78,6 +127,7 @@ export class PrestigeService {
       }
     ]
   };
+ 
 
   _deleteModal: any = {
     title: 'Delete',
@@ -108,6 +158,8 @@ export class PrestigeService {
       value: null
     }
   }
+
+  cuttingList = [];
 /////////////////////////////// projects
 
 ///////////////////////////////supplier
@@ -162,7 +214,8 @@ export class PrestigeService {
           section: data.section,
           color: data.color,
           materialName: m.name,
-          price: m.price
+          price: m.price,
+          type: data.type
         }
       ).then( () => {
         this.M.toast(`
@@ -342,14 +395,24 @@ export class PrestigeService {
             Object.keys(z.po).map((key) => {
 
               if(z.po[key].supplier == 'FROM STOCK'){
+
+                if(z.po[key].type.toLowerCase() == 'aluminum'){
                   z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
                   * z.po[key].numberOfSet;
                   
                   subTotal+= z.po[key]['subtotal'];
                  console.log('from stock')
+                }
               }
               else{
-                z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+               if( z.po[key]['type'] == "Glass"){
+                z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+                
+               }
+               else{
+                z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
+                
+               }
                 subTotal+= z.po[key]['subtotal'];
               }
               
@@ -385,7 +448,7 @@ export class PrestigeService {
     });
   }
 
-  getMaterials(supplier, section, color){
+  getMaterials(supplier, section, color, type){
     if(supplier != null){
       this.projects_materialList = [];
 
@@ -400,76 +463,99 @@ export class PrestigeService {
           x['isCheck'] = true;
           x['qty'] = null;
           x['stockPrice'] = null;
-          x['type'] = null;
+          x['type'] = x.type;
           x['materialKey'] = element.payload.key;
 
           this.projects_materialList.unshift(x);
         })
         // console.log(section, color)
         console.log(this.projects_materialList)
-        this.sortMaterials(section, color)
+        this.sortMaterials(section, color, type)
       })
     }
   }
 
-  sortMaterials(section, color){
+  sortMaterials(section, color, type){
     console.log(section+'---'+color)
 
     this.projects_materialList.forEach( m =>  {
 
-      if(section != null && color == null){
-        m.isShow = m.section == section ? true : false;
+      if(type == m.type){
+        
+        if(section != null && color == null){
+          m.isShow = m.section == section ? true : false;
+        }
+        else if(section == null && color != null){
+          m.isShow = m.color == color ? true : false;
+        }
+        else if(section != null && color != null){
+          m.isShow = section == m.section && color == m.color ? true : false;
+        }
+        else{
+          m.isShow = true;
+        }
       }
-      else if(section == null && color != null){
-        m.isShow = m.color == color ? true : false;
-      }
-      else if(section != null && color != null){
-        m.isShow = section == m.section && color == m.color ? true : false;
+      else{
+        m.isShow = false;
       }
 
+    });
+    // this.getMaterialsByType(type);
+  }
+
+  getMaterialsByType(type){
+    this.projects_materialList.forEach( m =>  {
+      m.isShow = type == m.type ? true : false;
+    });
+
+    this.stockList.forEach( m =>  {
+      m.isShow = type == m.type ? true : false;
     });
   }
 
   addPO(data, projectKey, date, isFromStock){
     // console.log(data)
     // console.log(data[0].supplier)
-   
-    
-    this.fb.add(`tblpo`, {
-      po: data,
-      projectKey: projectKey,
-      supplier: data[0].supplier,
-      date: date,
-      paid: false
-    })
-    .then( () => {
-      console.log('added')
+
+    this.getGlassCut(data);
+    // this.fb.add(`tblpo`, {
+    //   po: data,
+    //   projectKey: projectKey,
+    //   supplier: data[0].supplier,
+    //   date: date,
+    //   paid: false
+    // })
+    // .then( () => {
+    //   console.log('added')
       
 
-      if(isFromStock){
-          this.getScrap(data);
-        // data.forEach( d => {
-        //   this.fb.edit('tblstock', d.stockKey, { qty: (d.stock-d.qty)})
-        //   .then( () => {
-        //     console.log('updated qty');
-        //   });
-        // });
+    //   if(isFromStock){
+    //       this.getScrap(data);
+    //     // data.forEach( d => {
+    //     //   this.fb.edit('tblstock', d.stockKey, { qty: (d.stock-d.qty)})
+    //     //   .then( () => {
+    //     //     console.log('updated qty');
+    //     //   });
+    //     // });
 
-        // this.stockList.forEach(x => {
-        //   x['isShow'] = true;
-        //   x['isCheck'] = true;
-        //   x['qty'] = null;
-        // });
+    //     // this.stockList.forEach(x => {
+    //     //   x['isShow'] = true;
+    //     //   x['isCheck'] = true;
+    //     //   x['qty'] = null;
+    //     // });
 
-      }
-      this.M.toast('New PO has been added')
-      this.projects_materialList.forEach(x => {
-        x['isShow'] = true;
-        x['isCheck'] = true;
-        x['qty'] = null;
-      });
+    //   }
+    //   this.M.toast('New PO has been added')
+    //   this.projects_materialList.forEach(x => {
+    //     x['isShow'] = true;
+    //     x['isCheck'] = true;
+    //     x['qty'] = null;
+    //     x['numberOfSet'] = null;
+    //     x['width'] = null;
+    //     x['height'] = null;
+    //   });
 
-    });
+    // });
 
   }
 
@@ -477,8 +563,178 @@ export class PrestigeService {
       return a - b;
   }
 
+  getGlassCut(data){
+    // console.log(data);
+
+    data.forEach( x => {
+      this.processGlassCut(x, x.numberOfSet);
+    });
+  }
+
+  processGlassCut(x, numberOfSet){
+    this.fb.retrieveOnce('tblscrap', 'stockKey', x.stockKey).once('value', (r) => {
+      let res = r.toJSON();
+      console.log(res)
+      if(res == null){
+        console.log('walang laman')
+        this.addGlassScrap(x, numberOfSet);
+      }
+      else{
+       
+        let scrap = [];
+  
+        Object.keys(res).map((key) => {
+          scrap.push(
+            {
+              scrap: res[key].scrap,
+              scrapKey: key
+            }
+          );
+        });
+
+        console.log(scrap);
+
+        for(let i = 0; i < scrap.length; i++){
+          
+          for(let j = 0; j < scrap.length; j++){
+            let baseW = scrap[i].scrap.split(' x ')[0].replace('ft','');
+            let baseH = scrap[i].scrap.split(' x ')[1].replace('ft','');
+
+            if(scrap[i].scrap.split(' x ')[0].replace('ft','') < scrap[j].scrap.split(' x ')[0].replace('ft','') ||
+              scrap[i].scrap.split(' x ')[1].replace('ft','') < scrap[j].scrap.split(' x ')[1].replace('ft','')){
+              
+                console.log(scrap[i].scrap.split(' x ')[0].replace('ft','') +'<'+ scrap[j].scrap.split(' x ')[0].replace('ft',''))
+                console.log(scrap[i].scrap.split(' x ')[1].replace('ft','') +'<'+ scrap[j].scrap.split(' x ')[1].replace('ft',''))
+                console.log('sort')
+                
+              let temp = scrap[i] ;
+              scrap[i] = scrap[j];
+              scrap[j] = temp;
+            }
+
+          }
+
+        }
+
+        console.log(scrap)
+        // let isGetNewScrap = true;
+        let countFinishSet = 0;
+        let scrapKeyToDelete;
+        let isDeleteExisting = false;
+
+
+        for(let i = 0; i < numberOfSet; i++){
+          let ctr = 0;
+          let isNotAvailable = true;
+        
+
+          for(let s of scrap){
+            console.log(s)
+
+            let baseW = s.scrap.split(' x ')[0].replace('ft','');
+            let baseH = s.scrap.split(' x ')[1].replace('ft','');
+
+            console.log(baseW +' x '+baseH);
+            
+            if(baseW >= x.width && baseH >= x.height){
+
+              // HORIZONTAL
+              let horizontal = {
+                cut01: `${(baseW - x.width)}ft x ${x.height}ft`,
+                cut02: `${baseW}ft x ${(baseH - x.height)}ft`
+              }
+
+              let vertical = {
+                cut01: `${x.width}ft x ${(baseH - x.height)}ft`,
+                cut02: `${(baseW - x.width)}ft x ${baseH}ft`
+              }
+
+              s.cutSize = horizontal;
+              scrapKeyToDelete = s.scrapKey;
+              console.log(horizontal)
+              console.log(vertical)
+              isDeleteExisting = true;
+              break;
+            }
+
+          }
+
+        }
+        // console.log(scrap)
+
+        isDeleteExisting ? this.deleteGlassScrap(scrap, x, scrapKeyToDelete) : this.updateGlassScrap(scrap, x);
+
+        // this.updateGlassScrap(scrap, x, isDeleteExisting);
+
+      }
+    });
+  }
+
+  addGlassScrap(data, numberOfSet){
+    console.log('getting new glass scrap from tblstock');
+    if(data.stock > 0){
+
+      this.fb.add('tblscrap', {
+        scrap: data.baseSize,
+        stockKey: data.stockKey
+      }).then( () => {
+        console.log('Added new Scrap')
+        data.stock-=1;
+        this.fb.edit('tblstock', data.stockKey, {
+          qty: data.stock
+        })
+        .then( () =>{
+          console.log('-1 from stock')
+          this.processGlassCut(data, numberOfSet);
+        })
+       
+      });
+
+    }
+    else{
+      this.M.toast(`<span class="yellow-text">${data.materialName} </span>&nbsp;insufficient stock or scrap`);
+    }
+  }
+
+  deleteGlassScrap(data, item, scrapKeyToDelete){
+    console.log('pumasok sa delete glass scrap');
+    console.log(data);
+
+    this.fb.delete('tblscrap', scrapKeyToDelete)
+    .then( () =>{
+      this.updateGlassScrap(data, item)
+    });
+  }
+
+  updateGlassScrap(data, item){
+    console.log('pumasok sa updateGlassScrap')
+    console.log(data)
+
+    data.forEach(d => {
+
+      if(d.cutSize == null || d.cutSize == undefined){}
+      else{
+        Object.keys(d.cutSize).map((key) => {
+          console.log(d.cutSize[key])
+          this.fb.add('tblscrap', {
+            stockKey: item.stockKey,
+            scrap: d.cutSize[key]
+          }).
+          then( () =>{
+            console.log(`added ${d.cutSize.cut01} and ${d.cutSize.cut02}`)
+          });
+        }); 
+      } 
+      
+    });
+
+    
+  }
+
+
   getScrap(data){
     console.log(data);
+    
     
     data.forEach( x => {
       console.log(x)
@@ -722,18 +978,20 @@ export class PrestigeService {
         let subTotal = 0;
 
         Object.keys(z.po).map((key) => {
-          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
           
           
           if(z.po[key].supplier == 'FROM STOCK'){
-            z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
-            * z.po[key].numberOfSet;
-            
-              subTotal+= z.po[key]['subtotal'];
-            console.log('from stock')
+            if(z.po[key].type.toLowerCase() == 'aluminum'){
+                z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+                * z.po[key].numberOfSet;
+                
+                subTotal+= z.po[key]['subtotal'];
+                console.log('from stock')
+              }
           }
           else{
-            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
             subTotal+= z.po[key]['subtotal'];
           }
 
@@ -789,17 +1047,19 @@ export class PrestigeService {
         let subTotal = 0;
 
         Object.keys(z.po).map((key) => {
-          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+          z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
 
           if(z.po[key].supplier == 'FROM STOCK'){
-            z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
-            * z.po[key].numberOfSet;
-            
+            if(z.po[key].type.toLowerCase() == 'aluminum'){
+              z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+              * z.po[key].numberOfSet;
+              
               subTotal+= z.po[key]['subtotal'];
-            console.log('from stock')
+             console.log('from stock')
+            }
           }
           else{
-            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].qty);
+            z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
             subTotal+= z.po[key]['subtotal'];
           }
 
@@ -854,13 +1114,16 @@ export class PrestigeService {
 
   // STOCK
   addStock(data, date){
-    // console.log(data)
+    console.log(data)
+    
+    
+
     data.forEach( x => {
      this.fb.add('tblstock',{
       materialKey: x.materialKey,
       price: x.price,
       qty: x.qty,
-      baseLength: 252
+      baseLength: x.type == 'Aluminum' ? 252 : x.type == 'Glass' ? `${x.width}ft x ${x.height}ft` : ''
      }).then(() => {
         this.M.toast(`
           <span class="green-text">${x.materialName}</span>&nbsp;material has been addedd to stock.
@@ -908,7 +1171,7 @@ export class PrestigeService {
     // })
   }
 
-  getStockMaterials(section, color){
+  getStockMaterials(section, color, type){
     this.fb.retrieve('tblstock')
     .subscribe(res => {
       this.stockList = [];
@@ -923,6 +1186,7 @@ export class PrestigeService {
           materialObj['materialName'] = m[1].payload.toJSON();
           materialObj['section'] = m[3].payload.toJSON();
           materialObj['supplier'] = 'FROM STOCK';
+          materialObj['type'] = m[5].payload.toJSON();
         })
 
         materialObj['isShow'] = true;
@@ -931,7 +1195,6 @@ export class PrestigeService {
         materialObj['stockPrice'] = null;
         materialObj['stockKey'] = x.payload.key;
         materialObj['baseSize'] = x.payload.toJSON().baseLength;
-        materialObj['type'] = x.payload.toJSON().type;
         materialObj['price'] = x.payload.toJSON().price;
         materialObj['stock'] = x.payload.toJSON().qty;
         materialObj['numberOfSet'] = null;
@@ -943,9 +1206,10 @@ export class PrestigeService {
       console.log(this.stockList)
       let wew = this;
       setTimeout( function() {
-        wew.sortMaterialsStock(section, color);
+        wew.sortMaterialsStock(section, color, type);
         wew.progressStockstable = false;
-      }, 0)
+        
+      }, 300)
       
     });
   }
@@ -970,24 +1234,36 @@ export class PrestigeService {
     });
   }
 
-  sortMaterialsStock(section, color){
+  sortMaterialsStock(section, color, type){
   
-
     this.stockList.forEach( m =>  {
+   
 
-      if(section != null && color == null){
-        m.isShow = m.section == section ? true : false;
-      }
-      else if(section == null && color != null){
-        m.isShow = m.color == color ? true : false;
-      }
-      else if(section != null && color != null){
-        m.isShow = section == m.section && color == m.color ? true : false;
-      }
+      if(type == m.type){
+        
+        if(section != null && color == null){
+          m.isShow = m.section == section ? true : false;
+        }
+        else if(section == null && color != null){
+          m.isShow = m.color == color ? true : false;
+        }
+        else if(section != null && color != null){
+          m.isShow = section == m.section && color == m.color ? true : false;
+        }
+        else{
+          m.isShow = true;
+        }
 
+        console.log(m.isShow)
+      }
+      else{
+        m.isShow = false;
+      }
+      
     });
-
     console.log(this.stockList)
+    
+    // this.getMaterialsByType(type);
   }
 
   getScrapUsingMaterial(data){
@@ -995,20 +1271,36 @@ export class PrestigeService {
     this.fb.retrieveWithCondition('tblscrap', 'stockKey', data.stockKey)
     .subscribe( res => {
       
-      this.scrapList = [];
-
+      this.scrapList = {};
+      let arr = [];
       res.forEach( element => {
 
-        this.scrapList.unshift({
+        arr.unshift({
           materialName: data.materialName,
           color: data.color,
-          scrap: element.payload.toJSON().scrap
+          scrap: element.payload.toJSON().scrap,
+          stockkey: data.stockKey
         });
         
       });
 
+      this.scrapList = {
+        list: arr,
+        stockKey: data.stockKey
+      }
       console.log(this.scrapList)
     });
+  }
+
+  addScrapManually(stockKey, data){
+    this.fb.add('tblscrap', {
+      scrap: data,
+      stockKey: stockKey
+    })
+    .then( () =>{
+      this.M.toast('Scrap successfully added')
+    })
+    console.log(stockKey + '   '+ data);
   }
   // STOCK
 }

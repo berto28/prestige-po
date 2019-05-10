@@ -11,9 +11,12 @@ import { MaterializeService } from '../../services/materialize.service';
 export class CanvasAddComponent implements OnInit {
 
  
- materialName: string;
+  materialName: string;
   materialPrice: number;
 
+  // isRadioCheck: Array<any> = [true, false, false];
+  // materialType: Array<string> = ['Aluminum', 'Glass', 'Accessories'];
+  type = 'Aluminum';
 
   constructor(public prestige: PrestigeService,
               public materialService: MaterializeService) {
@@ -82,13 +85,15 @@ export class CanvasAddComponent implements OnInit {
       supplier: this.prestige.canvas_supplierPick,
       section: this.prestige.canvas_sectionPick,
       color: this.prestige.canvas_colorPick,
-      materials: this.prestige.materials
+      materials: this.prestige.materials,
+      type: this.type
     };
 
     this.prestige.addCanvas(obj);
   }
 
   onClickAddMaterial(): void {
+
     this.prestige.materials.push(
       {
         name: '',
@@ -99,6 +104,10 @@ export class CanvasAddComponent implements OnInit {
 
   onClickClose(index): void {
     this.prestige.materials.splice(index,1);
+  }
+
+  onClickRadioButton(type){
+    this.type = type;
   }
 
 }

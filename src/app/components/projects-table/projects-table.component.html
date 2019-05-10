@@ -27,7 +27,8 @@
             <h4>PO Total: {{p.total | currency:'&#x20B1;'}}</h4>
           </div>
           <div class="right-align">
-              <a class="btn waves-effect waves-light" (click)="onClickPrint(p.po)">Print<i class="material-icons right">print</i></a>
+              <a class="btn waves-effect waves-light"
+               (click)="onClickPrint(p.po)">Print<i class="material-icons right">print</i></a>
           </div>
           
       </div>
@@ -40,3 +41,5 @@
 <app-modal-add-po [projectKey]="projectKey"></app-modal-add-po>
 
 <app-print-po [printPO]="printPO"></app-print-po>
+
+<app-modal-cutting-list [cuttingList]="prestige.cuttingList"></app-modal-cutting-list>

@@ -9,3 +9,7 @@
 .badge {
     cursor: pointer;
 }
+
+.dropdown-trigger{
+    width: 100%;
+}

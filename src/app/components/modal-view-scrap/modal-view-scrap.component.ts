@@ -7,9 +7,15 @@ import { PrestigeService } from '../../services/prestige.service';
 })
 export class ModalViewScrapComponent implements OnInit {
 
+  newScrap: number = null;
+
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
+  }
+
+  onClickAddScrap(scrap){
+    this.prestige.addScrapManually(scrap.stockKey, this.newScrap);
   }
 
 }

@@ -11,6 +11,7 @@
       <table class="centered highlight">
         <thead>
           <tr>
+              <th>Type</th>
               <th>Supplier</th>
               <th>Section</th>
               <th>Color</th>
@@ -23,11 +24,12 @@
         <tbody in-view-container>
           
           <tr *ngFor="let m of prestige.materialList | slice:startFrom:toEnd">
+            <td>{{ m.type }}</td>
             <td>{{ m.supplier }}</td>
             <td>{{ m.section }}</td>
             <td>{{ m.color }}</td>
             <td>{{ m.materialName }}</td>
-            <td>{{ m.price | currency:'&#x20B1;'}}</td>
+            <td>{{ m.price | currency:'&#x20B1;'}}{{m.type == 'Glass' ? '/SQFT' : ''}}</td>
             <td>
               <a 
               class="btn yellow darken-2 left modal-trigger" href="#modalupdate"

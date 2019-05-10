@@ -29,6 +29,7 @@ import { StocksTableComponent } from './components/stocks-table/stocks-table.com
 import { ModalPayComponent } from './components/modal-pay/modal-pay.component';
 import { ModalViewScrapComponent } from './components/modal-view-scrap/modal-view-scrap.component';
 import { ModalCuttingListComponent } from './components/modal-cutting-list/modal-cutting-list.component';
+import { RadioMaterialTypeComponent } from './components/radio-material-type/radio-material-type.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { ModalCuttingListComponent } from './components/modal-cutting-list/modal
     StocksTableComponent,
     ModalPayComponent,
     ModalViewScrapComponent,
-    ModalCuttingListComponent
+    ModalCuttingListComponent,
+    RadioMaterialTypeComponent
   ],
   imports: [
     BrowserModule,

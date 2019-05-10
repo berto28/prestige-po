@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-modal-cutting-list',
@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./modal-cutting-list.component.css']
 })
 export class ModalCuttingListComponent implements OnInit {
+
+  @Input() cuttingList;
 
   constructor() { }
 

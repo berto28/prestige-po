@@ -11,7 +11,7 @@ export class StocksTableComponent implements OnInit {
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
-    this.prestige.getStockMaterials(null, null);
+    this.prestige.getStockMaterials(null, null, null);
   }
 
   onClickViewScrap(material){

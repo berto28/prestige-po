@@ -9,10 +9,11 @@
       <table class="centered highlight">
         <thead>
          <tr>
+          <th>Type</th>
           <th>Section</th>
           <th>Color</th>
           <th>Material Name</th>
-          <th>Base Size</th>
+          <th>Size</th>
           <th>Price</th>
           <th>Qty</th>
           <th></th>
@@ -20,11 +21,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let m of prestige.stockList">
+            <td>{{ m.type }}</td>
             <td>{{ m.section }}</td>
             <td>{{ m.color }}</td>
             <td>{{ m.materialName }}</td>
             <td>{{ m.baseSize }}</td>
-            <td>{{ m.price | currency:'&#x20B1;' }}</td>
+            <td>{{ m.price | currency:'&#x20B1;' }}{{ m.type == 'Glass' ? '/SQFT' : '' }}</td>
             <td>{{ m.numberOfStock }}</td>
             <td>
                 <a class="btn darken-2 left modal-trigger" href="#modalViewScrap"

@@ -2,6 +2,7 @@
 <div id="modal1" class="modal bottom-sheet modal-fixed-footer">
     <div class="modal-content">
       <h4>Add PO</h4>
+      <app-radio-material-type (typeEmitter)=onClickRadioType($event)></app-radio-material-type>
       <div class="row">
         <div class="col s12 right-align">
           <div class="switch">
@@ -17,14 +18,21 @@
       <div class="row">
         <div class="col s6" [ngClass]="switch ? 'hide': ''">
           <app-dropdown-color (color)="onSelectSupplier($event)" 
-          [dropdownData]="prestige.dropdownSupplier"></app-dropdown-color>
+          [dropdownData]=" 
+          type == 'Aluminum' ? prestige.dropdownSupplier : 
+          type == 'Glass' ? prestige.dropdownSupplierGlass : ''
+          "></app-dropdown-color>
         </div>
         <div class="col s6">
           <app-dropdown-color (color)="onSelectSection($event)" 
-          [dropdownData]="prestige.dropdownSection"></app-dropdown-color>
+          [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
+          type == 'Glass' ? prestige.dropdownSectionGlass : ''"></app-dropdown-color>
         </div>
+        <!-- dropdownGlassType -->
         <div class="col s6 " [ngClass]="!this.switch ? 'offset-s6' : ''">
-            <div class="col s4" *ngFor="let c of prestige.dropdownColor.arr; let i = index">
+            <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
+                                                type == 'Glass' ? prestige.dropdownGlassType.arr : ''; 
+                                                let i = index">
               <p (click)="onClickRadioButton(c, $event, i)">
                 <label>
                   <input name="group1" class="with-gap" [checked]="isRadioCheck[i]"  type="radio"/>
@@ -48,89 +56,51 @@
                   <input type="checkbox" [(ngModel)]="!m.isCheck"/>
                   <span> 
                     <span>
-                      <span class="yellow-text text-darken-2">{{ switch ? m.section : m.supplier }} &nbsp;</span>
+                      <span class="yellow-text text-darken-2">{{ switch ? m.section : m.supplier }}</span><br>
+                      <span>{{ m.section }}&nbsp;</span>
                       <span> {{ m.color }}</span>
                     </span><br>
                    
                     {{ m.materialName }}<br> 
-                    {{ m.price | currency:'&#x20B1;'}} <span *ngIf="switch">&nbsp; ({{m.numberOfStock}})</span>
-                    
+                    {{ m.price | currency:'&#x20B1;'}}{{ m.type == 'Glass' ? '/SQFT' : '' }}
+                    <span *ngIf="switch">&nbsp; ({{m.numberOfStock}})</span> <br>
+                    <span *ngIf="switch && m.type == 'Glass'">base size: {{ m.baseSize }}</span>
                 </span>
                 </label>
               </p>
-              <span *ngIf="switch"
-              (click)="onClickViewScrap(m.stockKey)" class="new badge teal" data-badge-caption="">View Scrap</span>
-              <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.numberOfSet"
-              (change)="onChangeQty(m)" (keyup)="onChangeQty(m)">
-              
-              <input *ngIf="m.type == 'aluminum'"
+              <div class="row" *ngIf="switch">
+                <span 
+                (click)="onClickViewScrap(m.stockKey)" class="new badge teal" data-badge-caption="">View Scrap</span>
+              </div>
+              <div class="row" *ngIf="m.type == 'Glass'">
+                <div class="col s6">
+                  <input type="number" placeholder="Width (ft)" step="1" [(ngModel)]="m.width"
+                  (change)="onChangeSize(m)" (keyup)="onChangeSize(m)">
+                </div>
+                <div class="col s6">
+                  <input type="number" placeholder="Height (ft)" step="1" [(ngModel)]="m.height"
+                  (change)="onChangeSize(m)" (keyup)="onChangeSize(m)">
+                </div>
+              </div>
+
+              <input *ngIf="switch && m.type == 'Aluminum'"
               id="icon_prefix" type="number" placeholder="Length should not be greater than 252in" 
               (change)="onChangeQty(m)" (keyup)="onChangeQty(m)"[(ngModel)]="m.qty" >
+              
+              <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.numberOfSet"
+              (change)="onChangeQty(m)" (keyup)="onChangeQty(m)">
+             
+              <div class="switch center-align">
+                <label>
+                  Horizontal
+                  <input type="checkbox">
+                  <span class="lever"></span>
+                  Vertical
+                </label>
+              </div>
+              
             </div>
         </ng-container>
-        <!-- <div class="col s12 wew">
-            <table class="highlight centered">
-              <thead>
-                <tr>
-                  <th>TUBING</th>
-                  <th>STAIRNOSING</th>
-                  <th>COUNTERNOSING</th>
-                  <th>U CHANNEL</th>
-                  <th>J CLIP</th>
-                  <th>COUNTER TRIM</th>
-                  <th>ANGULAR</th>
-                  <th>LOUVER</th>
-                  <th>FIXED SCREEN</th>
-                  <th>DISPLAY SHOWCASE</th>
-                  <th>FLATBAR</th>
-                  <th>ED DOOR</th>
-                  <th>SLIDING</th>
-                  <th>TUBE</th>
-                  <th>CASEMENT AND AWNING</th>
-                  <th>MULLION</th>
-                </tr>
-              </thead>
-      
-              <tbody>
-                <tr>
-                  <td class="center-align">
-                    <p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                    <input id="icon_prefix" type="number" placeholder="Quantity" step="1">
-                  </td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                  <td><p _ngcontent-c6=""><label _ngcontent-c6=""><input _ngcontent-c6="" type="checkbox" ng-reflect-model="false" class="ng-untouched ng-pristine ng-valid"><span _ngcontent-c6=""></span></label><br>₱623.70</p>
-                  <input id="icon_prefix" type="number" placeholder="Quantity" step="1"></td>
-                </tr>
-              </tbody>
-            </table>
-        </div> -->
       </div>
     </div>
     <div class="modal-footer">

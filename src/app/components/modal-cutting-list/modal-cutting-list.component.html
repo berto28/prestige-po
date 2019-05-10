@@ -1,3 +1,26 @@
-<p>
-  modal-cutting-list works!
-</p>
+<div id="cuttingList" class="modal">
+  <div class="modal-content">
+    <h4>CuttingList</h4>
+    <div class="card" *ngFor="let c of cuttingList">
+        <div class="card-content">
+          <h6 class="teal-text">{{c.cuts[0].materialName}} 
+            <span class="right">base size: {{c.cuts[0].baseSize}}</span>
+          </h6>
+          <br>
+          <p *ngFor="let cuts of c.cuts">
+            {{ cuts.qty+'in' }} x {{ cuts.timesUsed }} = {{ cuts.totalQty +'in' }}
+          </p>
+          <br>
+          <p>
+            <span class="yellow-text text-darken-3">{{ c.totalOfSetUsed }} </span> 
+            <span *ngIf="c.totalOfSetUsed > 1">sets</span> 
+            <span *ngIf="c.totalOfSetUsed == 1">set</span> 
+            of {{ c.cuts[0].materialName }} has been used.</p>
+        </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
+</div>
+          

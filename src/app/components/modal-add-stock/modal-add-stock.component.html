@@ -2,17 +2,22 @@
 <div id="modal1" class="modal bottom-sheet modal-fixed-footer">
   <div class="modal-content">
     <h4>Add Stock</h4>
+    <app-radio-material-type (typeEmitter)=onClickRadioType($event)></app-radio-material-type>
     <div class="row">
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSupplier($event)" 
-        [dropdownData]="prestige.dropdownSupplier"></app-dropdown-color>
+        [dropdownData]="type == 'Aluminum' ? prestige.dropdownSupplier : 
+        type == 'Glass' ? prestige.dropdownSupplierGlass : ''"></app-dropdown-color>
       </div>
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSection($event)" 
-        [dropdownData]="prestige.dropdownSection"></app-dropdown-color>
+        [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
+        type == 'Glass' ? prestige.dropdownSectionGlass : ''"></app-dropdown-color>
       </div>
       <div class="col s6 offset-s6">
-          <div class="col s4" *ngFor="let c of prestige.dropdownColor.arr; let i = index">
+          <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
+                                               type == 'Glass' ? prestige.dropdownGlassType.arr : ''; 
+                                               let i = index">
             <p (click)="onClickRadioButton(c, $event, i)">
               <label>
                 <input name="group1" class="with-gap" [checked]="isRadioCheck[i]"  type="radio"/>
@@ -34,18 +39,27 @@
              
               <span> 
                 <span>
-                  <span class="yellow-text text-darken-2">{{ m.supplier }} &nbsp;</span>
+                  <span class="yellow-text text-darken-2">{{ m.supplier }}<br>
+                  <span>{{ m.section }}&nbsp;</span></span>
                   <span> {{ m.color }}</span>
                 </span><br>
                
                 {{ m.materialName }}<br> 
-                {{ m.price | currency:'&#x20B1;'}}
+                {{ m.price | currency:'&#x20B1;' }}{{ m.type == 'Glass' ? '/SQFT' : '' }}
             </span>
             </label>
           </p>
+          <div class="row" *ngIf="m.type == 'Glass'">
+            <div class="col s6">
+              <input type="number" placeholder="Width (ft)" step="1" [(ngModel)]="m.width">
+            </div>
+            <div class="col s6">
+              <input type="number" placeholder="Height (ft)" step="1" [(ngModel)]="m.height">
+            </div>
+          </div>
           <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.qty">
         </div>
-    </ng-container>
+      </ng-container>
     </div>
   </div>
   <div class="modal-footer">

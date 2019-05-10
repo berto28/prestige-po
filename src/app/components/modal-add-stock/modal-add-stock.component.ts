@@ -15,6 +15,7 @@ export class ModalAddStockComponent implements OnInit {
   sectionPick: string;
   isRadioCheck: Array<any> = [false, false, false];
 
+  type = 'Aluminum';
   ngOnInit() {
   }
 
@@ -26,13 +27,13 @@ export class ModalAddStockComponent implements OnInit {
 
   onSelectSection(section){
     this.sectionPick = section;
-    this.prestige.sortMaterials(this.sectionPick, this.colorPick);
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
     
   }
   
 
   getMaterials(){
-    this.prestige.getMaterials(this.supplierPick, this.sectionPick, this.colorPick);
+    this.prestige.getMaterials(this.supplierPick, this.sectionPick, this.colorPick, this.type);
   }
 
   onClickRadioButton(color, evt, i){
@@ -45,7 +46,7 @@ export class ModalAddStockComponent implements OnInit {
     }
     this.isRadioCheck[i] = true;
 
-    this.prestige.sortMaterials(this.sectionPick, this.colorPick)
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type)
    
   }
   
@@ -77,6 +78,20 @@ export class ModalAddStockComponent implements OnInit {
     });
 
     proceed ?  this.prestige.addStock(jsonArray, date) : '';
+  }
+
+  onClickRadioType(type){
+    this.type = type;
+    this.supplierPick = null;
+    this.colorPick = null;
+    this.sectionPick = null;
+    console.log('asd')
+    this.prestige.dropdownSupplierGlass['text'] = 'Choose Supplier';
+    this.prestige.dropdownSectionGlass['text'] = 'Choose Section';
+    this.prestige.dropdownSection['text'] = 'Choose Section';
+    this.prestige.dropdownSupplier['text'] = 'Choose Supplier';
+    this.prestige.projects_materialList = [];
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
   }
 
 }

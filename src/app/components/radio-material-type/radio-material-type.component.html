@@ -1,0 +1,13 @@
+<div class="row">
+    <div class="col s9">
+        <p>Type</p>
+      <div class="col s4" *ngFor="let c of materialType; let i = index">
+        <p (click)="onClickRadioButton(c, $event, i)">
+          <label>
+            <input name="groupType" class="with-gap" [checked]="isRadioCheck[i]"  type="radio"/>
+            <span>{{ c }}</span>
+          </label>
+        </p>
+      </div>
+    </div>
+  </div>

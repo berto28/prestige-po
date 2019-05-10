@@ -15,7 +15,7 @@ export class ModalAddPoComponent implements OnInit {
   sectionPick: string = null;
   isRadioCheck: Array<any> = [false, false, false];
   switch: boolean = false;
-
+  type = 'Aluminum';
   constructor(public prestige: PrestigeService) { 
     console.log(this.projectKey)
     this.prestige.dropdownSection.text = 'choose a section';
@@ -25,29 +25,28 @@ export class ModalAddPoComponent implements OnInit {
   }
 
   ngOnInit() {
-    
   }
-
+  
   onSelectSupplier(supplier){
     console.log(supplier)
     this.supplierPick = supplier;
     
     this.getMaterials();
     // this.supplierPick != null ? 
-    // this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
-    // this.getMaterials() : '';
+    // this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
+    // this.getMaterials();
     
   }
 
   onSelectSection(section){
     this.sectionPick = section;
     // this.sectionPick != undefined ? this.getMaterials() : '';
-    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
-    this.prestige.sortMaterials(this.sectionPick, this.colorPick);
+    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
   }
 
   getMaterials(){
-    this.prestige.getMaterials(this.supplierPick, this.sectionPick, this.colorPick);
+    this.prestige.getMaterials(this.supplierPick, this.sectionPick, this.colorPick, this.type);
   }
 
   onClickRadioButton(color, evt, i){
@@ -60,8 +59,8 @@ export class ModalAddPoComponent implements OnInit {
     }
     this.isRadioCheck[i] = true;
 
-    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick) : 
-    this.prestige.sortMaterials(this.sectionPick, this.colorPick);
+    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
    
   }
 
@@ -109,7 +108,8 @@ export class ModalAddPoComponent implements OnInit {
     }
 
     jsonArray.forEach( x => {
-      if(x.qty == null || x.qty < 1){
+      console.log(x)
+      if(x.numberOfSet == null || x.numberOfSet < 1){
         proceed =  false;
         this.prestige.M.toast(`Quantitiy of '${x.materialName}' should not be BLANK OR LESS THAN 1`)
       }
@@ -130,16 +130,20 @@ export class ModalAddPoComponent implements OnInit {
     }
 
   //  proceed == false ? this.prestige.M.toast(`"SUPPLIER" should be the same.`): ''; 
-
-
+  
     proceed ?  this.prestige.addPO(jsonArray, this.projectKey, date, this.switch) : '';
   }
 
   onClickSwitch(evt){
     evt.preventDefault();
+    this.supplierPick = null;
+    this.colorPick = null;
+    this.sectionPick = null;
+    this.prestige.dropdownColor['text'] = 'Choose Color';
+    this.prestige.dropdownSection['text'] = 'Choose Section';
+    this.prestige.dropdownSupplier['text'] = 'Choose Supplier';
     this.switch = !this.switch;
-    this.switch ? this.prestige.getStockMaterials(this.sectionPick, this.colorPick) : this.getMaterials();
-   
+    this.switch ? this.prestige.getStockMaterials(this.sectionPick, this.colorPick, this.type) : this.getMaterials();
   }
 
   onClickViewScrap(stockKey){
@@ -168,4 +172,36 @@ export class ModalAddPoComponent implements OnInit {
     }
 
   }
+
+  onClickRadioType(type){
+    this.type = type;
+    this.supplierPick = null;
+    this.colorPick = null;
+    this.sectionPick = null;
+    console.log('asd')
+    this.prestige.dropdownSupplierGlass['text'] = 'Choose Supplier';
+    this.prestige.dropdownSectionGlass['text'] = 'Choose Section';
+    this.prestige.dropdownSection['text'] = 'Choose Section';
+    this.prestige.dropdownSupplier['text'] = 'Choose Supplier';
+    this.prestige.projects_materialList = [];
+    this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
+    this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
+   
+  }
+
+  onChangeSize(m){
+    console.log(m)
+    let baseW = m.baseSize.split(' x ')[0].replace('ft','');
+    let baseH = m.baseSize.split(' x ')[1].replace('ft','');
+   
+    m.width = baseW < m.width ? baseW : m.width;
+    m.height = baseH < m.height ? baseH : m.height;
+
+
+  }
+
+  onSelectCutStyle(cutStyle){
+    console.log(cutStyle)
+  }
+
 }
