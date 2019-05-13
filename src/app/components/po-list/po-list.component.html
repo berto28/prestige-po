@@ -31,7 +31,7 @@
               <td>{{ item.price}}{{ item.type == 'Glass' ? '/SQFT' : ''  }}</td>
               <td *ngIf="po['po'][0].type == 'Glass'">{{ item.width }}ft</td>
               <td *ngIf="po['po'][0].type == 'Glass'">{{ item.height }}ft</td>
-              <td>{{ item.supplier == 'FROM STOCK' ? item.qty : item.numberOfSet }}</td>
+              <td>{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td>
               <td *ngIf="item.supplier == 'FROM STOCK'">{{ item.numberOfSet }}</td>
               <td>{{ item.subtotal}}</td>
             </tr>
