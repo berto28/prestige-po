@@ -35,6 +35,7 @@ export class PoListComponent implements OnInit {
       this.prestige.pay = {
         projectKey: key,
         paidBy: 'check',
+        date: null,
         field: {
           id: 'checkNumber',
           label: 'Check Number',
@@ -56,9 +57,10 @@ export class PoListComponent implements OnInit {
           value: null
         }
       };
-      this.prestige.M.datePicker();
+      
       // this.prestige.payPO(key)
     });
+    this.prestige.M.datePicker();
   }
 
   onClickViewCuttingList(po){

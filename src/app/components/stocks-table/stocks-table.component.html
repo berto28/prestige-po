@@ -1,5 +1,5 @@
 <div>
-  <h2>Stock Materials</h2>
+  <h2>Stock Materials <a class="waves-effect waves-light btn modal-trigger" href="#modalStockPO">View PO</a></h2>
   <div class="progress" *ngIf="prestige.progressStockstable">
     <div class="indeterminate"></div>
   </div>
@@ -20,7 +20,7 @@
          </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let m of prestige.stockList">
+          <tr *ngFor="let m of prestige.stockList | slice:startFrom:toEnd">
             <td>{{ m.type }}</td>
             <td>{{ m.section }}</td>
             <td>{{ m.color }}</td>
@@ -29,10 +29,15 @@
             <td>{{ m.price | currency:'&#x20B1;' }}{{ m.type == 'Glass' ? '/SQFT' : '' }}</td>
             <td>{{ m.numberOfStock }}</td>
             <td>
-                <a class="btn darken-2 left modal-trigger" href="#modalViewScrap"
-                (click)="onClickViewScrap(m)"
-                > <i class="material-icons">border_clear</i></a>
-              <a class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+              <a class="btn darken-2 left modal-trigger tooltipped" href="#modalViewScrap"
+              (click)="onClickViewScrap(m)" 
+              data-position="left" data-tooltip="view scraps"
+              > <i class="material-icons">border_clear</i></a>
+              <a class="btn darken-2 left modal-trigger btnViewOut tooltipped" href="#inOut"
+              data-position="top" data-tooltip="view inventory (list of in and out)"
+              (click)="onClickViewInOut(m)"> <i class="material-icons">date_range</i></a> <br> <br>
+              <a class="btn yellow darken-2 left modal-trigger tooltipped" href="#modalupdate"
+              data-position="left" data-tooltip="edit the price and qty"
               (click)="onClickEditMaterial(m)"
               > <i class="material-icons">edit</i></a>
               <a class="btn red left"
@@ -50,3 +55,17 @@
 [editData]="prestige.stocks_modalUpdateFields"
 (updatedMaterial)="onClickUpdateModal($event)"
 ></app-modal-update>
+
+
+<!-- Modal Structure -->
+<div id="modalStockPO" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>List of PO</h4>
+    <app-po-list [poList]="prestige.stockPO"></app-po-list>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-green btn-flat">CLOSE</a>
+  </div>
+</div>
+
+<app-modal-pay [pay]="prestige.pay" ></app-modal-pay>

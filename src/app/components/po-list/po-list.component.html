@@ -11,11 +11,16 @@
                 <th>Supplier</th>
                 <th>Sesction</th>
                 <th>Item</th>
-                <th>Color</th>
+                <th *ngIf="po['po'][0].type != 'Accessories'">Color</th>
                 <th>Price</th>
                 <th *ngIf="po['po'][0].type == 'Glass'">Width</th>
                 <th *ngIf="po['po'][0].type == 'Glass'">Height</th>
-                <th>QTY</th>
+                <ng-container *ngIf="po['po'][0].supplier == 'FROM STOCK'">
+                  <th *ngIf="po['po'][0].type != 'Accessories'">QTY</th>
+                </ng-container>
+                <ng-container *ngIf="po['po'][0].supplier != 'FROM STOCK'">
+                  <th>QTY</th>
+                </ng-container>
                 <th *ngIf="po['po'][0].supplier == 'FROM STOCK'">Number of Set</th>
                 <th>Sub Total</th>
             </tr>
@@ -27,26 +32,37 @@
               <td>{{ item.supplier }}</td>
               <td>{{ item.section }}</td>
               <td>{{ item.materialName }}</td>
-              <td>{{ item.color}}</td>
+              <td *ngIf="item.type != 'Accessories'">{{ item.color}}</td>
               <td>{{ item.price}}{{ item.type == 'Glass' ? '/SQFT' : ''  }}</td>
               <td *ngIf="po['po'][0].type == 'Glass'">{{ item.width }}ft</td>
               <td *ngIf="po['po'][0].type == 'Glass'">{{ item.height }}ft</td>
-              <td>{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td>
+              <ng-container *ngIf="po['po'][0].supplier == 'FROM STOCK'">
+                <td *ngIf="item.type != 'Accessories'">{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td>
+              </ng-container>
+              <ng-container *ngIf="po['po'][0].supplier != 'FROM STOCK'">
+                <td>{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td>
+              </ng-container>
+              <!-- <td>{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td> -->
               <td *ngIf="item.supplier == 'FROM STOCK'">{{ item.numberOfSet }}</td>
-              <td>{{ item.subtotal}}</td>
+              <td>{{ item.subtotal | number : '1.2-2'}}</td>
             </tr>
             <tr>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
+              <td *ngIf="po['po'][0].type != 'Accessories'"></td>
               <td *ngIf="po['po'][0].type == 'Glass'"></td>
               <td *ngIf="po['po'][0].type == 'Glass'"></td>
-              <td></td>
+              <ng-container *ngIf="po['po'][0].supplier == 'FROM STOCK'">
+                <td *ngIf="po['po'][0].type  != 'Accessories'"></td>
+              </ng-container>
+              <ng-container *ngIf="po['po'][0].supplier != 'FROM STOCK'">
+                <td></td>
+              </ng-container>
               <td *ngIf="po['po'][0].supplier == 'FROM STOCK'"></td>
               <td class="teal-text"><b>Total:</b></td>
-              <td class="teal-text"><b> {{ po.subTotal }} </b></td>
+              <td class="teal-text"><b> {{ po.subTotal | number : '1.2-2' }} </b></td>
             </tr>
           </tbody>
         </table>
@@ -59,17 +75,21 @@
         <i class="material-icons right" *ngIf="po.paid">check</i>
           <!-- {{po.paid ? 'Paid' : 'Unpaid' }} -->
           {{ po.paid.paidBy == 'check' ? 
-             ('Paid by check#'+po.paid.check) :
+             (po.paid.date+' | Paid by check#'+po.paid.check) :
              po.paid.paidBy == 'cash' ?
-             ('Paid by Cash '+po.paid.date+ ' discount '+po.paid.discount+'%') : 
+             (po.paid.date+' | Paid by Cash | discount '+po.paid.discount+'%') : 
              'Unpaid' }}
         </a>
         <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
+        class="btn waves-effect disabled">
+          from stock
+        </a>
+        <!-- <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
             class="btn waves-effect modal-trigger"
             href="#cuttingList"
         (click)="onClickViewCuttingList(po['po'])">
           view cutting list
-        </a>
+        </a> -->
       </div>
   </ng-container>
   </div>

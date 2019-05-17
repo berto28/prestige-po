@@ -8,22 +8,22 @@
       <app-dropdown-color (color)="onSelectSupplier($event)" 
       [dropdownData]=" 
       type == 'Aluminum' ? prestige.dropdownSupplier : 
-      type == 'Glass' ? prestige.dropdownSupplierGlass : ''
+      type == 'Glass' ? prestige.dropdownSupplierGlass : prestige.dropdownSupplierAccessories
       "></app-dropdown-color>
     </div>
     <div class="col s3 input-field">
       <p>section</p>
       <app-dropdown-color (color)="onSelectSection($event)" 
       [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
-      type == 'Glass' ? prestige.dropdownSectionGlass : '' "></app-dropdown-color>
+      type == 'Glass' ? prestige.dropdownSectionGlass : prestige.dropdownSectionAccesories"></app-dropdown-color>
     </div>
-    <div class="col s3 input-field">
+    <div class="col s3 input-field" *ngIf="type == 'Aluminum' || type == 'Glass'">
       <p>
         {{type == 'Aluminum' ? 'color' : type == 'Glass' ? 'type' : ''}}
       </p>
       <app-dropdown-color (color)="onClickColor($event)" 
       [dropdownData]="type == 'Aluminum' ? prestige.dropdownColor : 
-      type == 'Glass' ? prestige.dropdownGlassType : '' "></app-dropdown-color>
+      type == 'Glass' ? prestige.dropdownGlassType : prestige.dropdownColor "></app-dropdown-color>
     </div>
   </div>
   <div class="row" *ngFor="let m of prestige.materials; let i = index">

@@ -23,11 +23,19 @@
         </div>
       </div>
       <br>
-      <div class="row">
+      <div class="row" *ngIf="prestige.scrapType != 'Accessories'">
         <h4>Manually add scrap</h4>
-        <div class="input-field col s3">
+        <div class="input-field col s3" *ngIf="prestige.scrapType != 'Glass'">
           <input id="scrapQTY" type="number" [(ngModel)]="newScrap" class="validate">
           <label for="scrapQTY">Scrap Qty</label>
+        </div>
+        <div class="input-field col s3" *ngIf="prestige.scrapType == 'Glass'">
+          <input id="txtWidthFT" type="number" [(ngModel)]="glassScrap.w" class="validate">
+          <label for="txtWidthFT">Scrap Qty</label>
+        </div>
+        <div class="input-field col s3" *ngIf="prestige.scrapType == 'Glass'">
+          <input id="txtHeightFT" type="number" [(ngModel)]="glassScrap.h" class="validate">
+          <label for="txtHeightFT">Scrap Qty</label>
         </div>
         <div class="col s3 btnScrapContainer">
           <a class="waves-effect waves-light btn left" (click)="onClickAddScrap(prestige.scrapList)">add scrap</a>

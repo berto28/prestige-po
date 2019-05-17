@@ -30,6 +30,7 @@ import { ModalPayComponent } from './components/modal-pay/modal-pay.component';
 import { ModalViewScrapComponent } from './components/modal-view-scrap/modal-view-scrap.component';
 import { ModalCuttingListComponent } from './components/modal-cutting-list/modal-cutting-list.component';
 import { RadioMaterialTypeComponent } from './components/radio-material-type/radio-material-type.component';
+import { ModalViewInOutStockComponent } from './components/modal-view-in-out-stock/modal-view-in-out-stock.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { RadioMaterialTypeComponent } from './components/radio-material-type/rad
     ModalPayComponent,
     ModalViewScrapComponent,
     ModalCuttingListComponent,
-    RadioMaterialTypeComponent
+    RadioMaterialTypeComponent,
+    ModalViewInOutStockComponent
   ],
   imports: [
     BrowserModule,

@@ -9,7 +9,7 @@ import { MaterializeService } from '../../services/materialize.service';
 export class RadioMaterialTypeComponent implements OnInit {
 
   isRadioCheck: Array<any> = [true, false, false];
-  materialType: Array<string> = ['Aluminum', 'Accessories'];
+  materialType: Array<string> = ['Aluminum', 'Glass', 'Accessories'];
   type = 'Aluminum';
   @Output() typeEmitter = new EventEmitter<string>();
   constructor(public materialService: MaterializeService) { }

@@ -7,16 +7,16 @@
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSupplier($event)" 
         [dropdownData]="type == 'Aluminum' ? prestige.dropdownSupplier : 
-        type == 'Glass' ? prestige.dropdownSupplierGlass : ''"></app-dropdown-color>
+        type == 'Glass' ? prestige.dropdownSupplierGlass : prestige.dropdownSupplierAccessories"></app-dropdown-color>
       </div>
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSection($event)" 
         [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
-        type == 'Glass' ? prestige.dropdownSectionGlass : ''"></app-dropdown-color>
+        type == 'Glass' ? prestige.dropdownSectionGlass : prestige.dropdownSectionAccesories"></app-dropdown-color>
       </div>
-      <div class="col s6 offset-s6">
+      <div class="col s6 offset-s6" *ngIf="type != 'Accessories'">
           <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
-                                               type == 'Glass' ? prestige.dropdownGlassType.arr : ''; 
+                                               type == 'Glass' ? prestige.dropdownGlassType.arr : prestige.dropdownColor.arr; 
                                                let i = index">
             <p (click)="onClickRadioButton(c, $event, i)">
               <label>
@@ -57,7 +57,7 @@
               <input type="number" placeholder="Height (ft)" step="1" [(ngModel)]="m.height">
             </div>
           </div>
-          <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.qty">
+          <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.numberOfSet">
         </div>
       </ng-container>
     </div>

@@ -130,7 +130,7 @@ export class ModalAddPoComponent implements OnInit {
     }
 
   //  proceed == false ? this.prestige.M.toast(`"SUPPLIER" should be the same.`): ''; 
-  
+    this.prestige.addingPOLoader = proceed == true ? true : false;
     proceed ?  this.prestige.addPO(jsonArray, this.projectKey, date, this.switch) : '';
   }
 
@@ -157,11 +157,24 @@ export class ModalAddPoComponent implements OnInit {
       //   m.numberOfStock = 0;
       //   m.qty = m.stock;
       // }
-      if(m.qty > 252){
-        // m.numberOfStock = 0;
-        m.qty = 252;
+      console.log(m)
+
+      if(m.type == 'Aluminum'){
+        if(m.qty > 252){
+          // m.numberOfStock = 0;
+          m.qty = 252;
+        }
       }
-      
+      else if(m.type == 'Accessories'){
+        if(m.numberOfSet > m.stock){
+            m.numberOfStock = 0;
+            m.numberOfSet = m.stock;
+        }
+        else{
+          m.numberOfStock = m.stock - m.numberOfSet;
+        }
+      }
+
       // if(m.numberOfSet > m.stock){
       //     m.numberOfStock = 0;
       //     m.numberOfSet = m.stock;
@@ -191,17 +204,25 @@ export class ModalAddPoComponent implements OnInit {
 
   onChangeSize(m){
     console.log(m)
-    let baseW = m.baseSize.split(' x ')[0].replace('ft','');
-    let baseH = m.baseSize.split(' x ')[1].replace('ft','');
-   
-    m.width = baseW < m.width ? baseW : m.width;
-    m.height = baseH < m.height ? baseH : m.height;
+    if(this.switch){
+      let baseW = m.baseSize.split(' x ')[0].replace('ft','');
+      let baseH = m.baseSize.split(' x ')[1].replace('ft','');
+    
+      m.width = baseW < m.width ? baseW : m.width;
+      m.height = baseH < m.height ? baseH : m.height;
+    }
 
 
   }
 
   onSelectCutStyle(cutStyle){
     console.log(cutStyle)
+  }
+
+  onClickGlassCutStle(m, e){
+    e.preventDefault();
+    m.glassCutStyle = !m.glassCutStyle;
+    console.log(m.glassCutStyle)
   }
 
 }

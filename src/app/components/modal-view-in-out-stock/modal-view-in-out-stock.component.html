@@ -1,0 +1,53 @@
+  <div id="inOut" class="modal">
+    <div class="modal-content">
+      <div class="row">
+          <h4>Inventory IN</h4>
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                  <th>Date</th>
+                  <th>Material Name</th>
+                  <th>Color</th>
+                  <th>QTY</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+              <tr *ngFor="let s of prestige.stockInList">
+                <td class="teal-text bold">{{s.date}}</td>
+                <td>{{ s.materialName }}</td>
+                <td>{{ s.color }}</td>
+                <td>{{ s.qty }}</td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+      <div class="row">
+        <h4>Inventory OUT</h4>
+        <table class="centered highlight">
+          <thead>
+            <tr>
+                <th>Date</th>
+                <th>Material Name</th>
+                <th>Color</th>
+                <th>Number of Set</th>
+                <th>QTY Used</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngFor="let s of prestige.stockOutList">
+              <td class="teal-text bold">{{s.date}}</td>
+              <td>{{ s.materialName }}</td>
+              <td>{{ s.color }}</td>
+              <td>{{ s.numberOfSet }}</td>
+              <td>{{ s.qty }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close waves-effect waves-green btn-flat">close</a>
+    </div>
+  </div>

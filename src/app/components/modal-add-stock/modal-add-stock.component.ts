@@ -70,8 +70,11 @@ export class ModalAddStockComponent implements OnInit {
     let date = mm + '/' + dd + '/' + yyyy;
     
     let proceed = true;
+
+    proceed = jsonArray.length != 0 ? true : false;
+
     jsonArray.forEach( x => {
-      if(x.qty == null || x.qty < 1){
+      if(x.numberOfSet == null || x.numberOfSet < 1){
         proceed =  false;
         this.prestige.M.toast(`Quantitiy of '${x.materialName}' should not be BLANK OR LESS THAN 1`)
       }

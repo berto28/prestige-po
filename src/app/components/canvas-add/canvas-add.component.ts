@@ -57,10 +57,11 @@ export class CanvasAddComponent implements OnInit {
       toastMessage = `Please pick a section`;
       isProceed ? '' : this.materialService.toast(toastMessage);
 
-      isProceed = this.prestige.canvas_colorPick == '' || this.prestige.canvas_colorPick == null ? false : true;
-      toastMessage = `Please pick a color`;
-      isProceed ? '' : this.materialService.toast(toastMessage);
-
+      if(this.type != 'Accessories'){
+        isProceed = this.prestige.canvas_colorPick == '' || this.prestige.canvas_colorPick == null ? false : true;
+        toastMessage = `Please pick a color`;
+        isProceed ? '' : this.materialService.toast(toastMessage);
+      }
       this.prestige.materials.forEach(element => {
         let num = ctr == 1 ? '1st' : ctr == 2 ? '2nd' : ctr == 3 ? '3rd' : ctr+'th';
 

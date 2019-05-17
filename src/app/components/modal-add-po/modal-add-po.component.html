@@ -20,18 +20,18 @@
           <app-dropdown-color (color)="onSelectSupplier($event)" 
           [dropdownData]=" 
           type == 'Aluminum' ? prestige.dropdownSupplier : 
-          type == 'Glass' ? prestige.dropdownSupplierGlass : ''
+          type == 'Glass' ? prestige.dropdownSupplierGlass : prestige.dropdownSupplierAccessories
           "></app-dropdown-color>
         </div>
         <div class="col s6">
           <app-dropdown-color (color)="onSelectSection($event)" 
           [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
-          type == 'Glass' ? prestige.dropdownSectionGlass : ''"></app-dropdown-color>
+          type == 'Glass' ? prestige.dropdownSectionGlass : prestige.dropdownSectionAccesories"></app-dropdown-color>
         </div>
         <!-- dropdownGlassType -->
-        <div class="col s6 " [ngClass]="!this.switch ? 'offset-s6' : ''">
+        <div class="col s6 " [ngClass]="!this.switch ? 'offset-s6' : ''" *ngIf="type != 'Accessories'">
             <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
-                                                type == 'Glass' ? prestige.dropdownGlassType.arr : ''; 
+                                                type == 'Glass' ? prestige.dropdownGlassType.arr : prestige.dropdownColor.arr; 
                                                 let i = index">
               <p (click)="onClickRadioButton(c, $event, i)">
                 <label>
@@ -47,6 +47,12 @@
       </div>
       <div class="progress" *ngIf="prestige.stockList.length == 0  && switch == true">
           <div class="indeterminate"></div>
+      </div>
+      <div class="right-align" [class]="prestige.addingPOLoader ? '' : 'hide'">
+        <div class="progress red lighten-3">
+          <div class="indeterminate red"></div>
+        </div>
+        <span>Adding PO...</span>
       </div>
       <div class="row">
         <ng-container *ngFor="let m of switch ? prestige.stockList :prestige.projects_materialList">
@@ -87,13 +93,14 @@
               id="icon_prefix" type="number" placeholder="Length should not be greater than 252in" 
               (change)="onChangeQty(m)" (keyup)="onChangeQty(m)"[(ngModel)]="m.qty" >
               
-              <input id="icon_prefix" type="number" placeholder="Quantity" step="1" [(ngModel)]="m.numberOfSet"
+              <input id="icon_prefix" type="number" placeholder="Quantity" step="1" 
+              [(ngModel)]="m.numberOfSet"
               (change)="onChangeQty(m)" (keyup)="onChangeQty(m)">
              
-              <div class="switch center-align">
-                <label>
+              <div class="switch center-align" *ngIf="switch && m.type">
+                <label (click)="onClickGlassCutStle(m, $event)">
                   Horizontal
-                  <input type="checkbox">
+                  <input type="checkbox" [(ngModel)]="m.glassCutStyle">
                   <span class="lever"></span>
                   Vertical
                 </label>

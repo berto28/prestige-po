@@ -54,5 +54,10 @@ export class MaterializeService {
     var elems = document.querySelectorAll('[data-target="dropdownCutStyle"]');
     var instances = M.Dropdown.init(elems, {});
   }
+
+  tooiltip(): void{
+      var elems = document.querySelectorAll('.tooltipped');
+      var instances = M.Tooltip.init(elems, {});
+  }
   
 }

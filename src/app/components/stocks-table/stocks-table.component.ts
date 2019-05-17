@@ -8,14 +8,35 @@ import { PrestigeService } from '../..//services/prestige.service';
 })
 export class StocksTableComponent implements OnInit {
 
+  startFrom: number = 0;
+  toEnd: number = 20;
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
     this.prestige.getStockMaterials(null, null, null);
+    this.prestige.getStockPO();
+    this.onWindowScroll();
+  }
+
+  onWindowScroll(){
+    window.onscroll = _ => {
+      var d = document.documentElement;
+      var offset = d.scrollTop + window.innerHeight;
+      var height = d.offsetHeight;
+     
+      if (offset >= height) {
+        this.toEnd+=20;
+      }
+    };
   }
 
   onClickViewScrap(material){
+    console.log(material)
     this.prestige.getScrapUsingMaterial(material);
+  }
+
+  onClickViewInOut(material){
+    this.prestige.viewInOut(material);
   }
 
   onClickEditMaterial(material){

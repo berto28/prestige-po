@@ -27,6 +27,10 @@ export class FirebaseService {
     return this.fb.list(url,(ref) => ref.orderByChild(key).equalTo(value)).query;
   }
 
+  onceRetrieve(url){
+    return this.fb.list(url).query;
+  }
+
   edit(url, key, data){
     return this.fb.list(url).update(key, data);
   }
