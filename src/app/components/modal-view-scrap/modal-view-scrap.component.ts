@@ -26,6 +26,7 @@ export class ModalViewScrapComponent implements OnInit {
         this.prestige.M.toast('New scrap SHOULD NOT be 0 or LESS THAN 1');
         isProceed = false;
       }
+      
       if(this.prestige.scrapBaseSize < this.newScrap){
         this.prestige.M.toast('New scrap SHOULD NOT GREATER THAN base size of material');
         isProceed = false;
@@ -43,13 +44,13 @@ export class ModalViewScrapComponent implements OnInit {
         isProceed = false;
       }
 
-      if(this.prestige.scrapBaseSize.split(' x ')[0].replace('ft','') < this.glassScrap.w ||
-        this.prestige.scrapBaseSize.split(' x ')[1].replace('ft','') < this.glassScrap.h){
+      if((this.prestige.scrapBaseSize.split(' x ')[0].replace('ft','') * 12) < this.glassScrap.w ||
+        (this.prestige.scrapBaseSize.split(' x ')[1].replace('ft','') * 12) < this.glassScrap.h){
         this.prestige.M.toast('New scrap Width or Height SHOULD NOT GREATER THAN base size of material');
         isProceed = false;
       } 
       
-      isProceed ?  this.prestige.addScrapManually(scrap.stockKey, `${this.glassScrap.w}ft x ${this.glassScrap.h}ft`): '';
+      isProceed ?  this.prestige.addScrapManually(scrap.stockKey, `${this.glassScrap.w}in x ${this.glassScrap.h}in`): '';
     }
 
     this.newScrap = null;

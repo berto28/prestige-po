@@ -1,0 +1,197 @@
+<div class="row">
+  <ul class="collapsible">
+    <li>
+      <div class="collapsible-header"><i class="material-icons">merge_type</i>Type</div>
+      <div class="collapsible-body">
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="typeName" name="typeName" [(ngModel)]="prestige.typeName" placeholder="Type Name" type="text" class="validate">
+          </div>
+          <div class="col s6 btnContainer">
+              <a class="waves-effect waves-light btn" name="addtype" (click)="onClickAddType()">
+                <i class="material-icons left">add</i>Add Type
+              </a>
+          </div>
+        </div>
+        <div class="row">
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of prestige.listOfType">
+                <td>{{ t.name }}</td>
+                <td>
+                  <a 
+                  class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+                  (click)="onClickEditType(t)"> <i class="material-icons">edit</i></a>
+                  <a 
+                  class="btn red left"
+                  (click)="onDeleteType(t)"> <i class="material-icons">delete</i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="material-icons">airport_shuttle</i>Supplier</div>
+      <div class="collapsible-body">
+        <div class="row">
+          <div class="col s3" *ngFor="let t of prestige.listOfType">
+            <p (click)="$event.preventDefault(); t.isCheck = !t.isCheck">
+              <label>
+                <input type="checkbox" [(ngModel)]="t.isCheck" />
+                <span>{{ t.name }}</span>
+              </label>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="supplier_name" name="supplier_name" [(ngModel)]="prestige.supplierName" placeholder="Supplier Name" type="text" class="validate">
+          </div>
+          <div class="col s6 btnContainer">
+            <a class="waves-effect waves-light btn" name="addSupplier" (click)="onClickAddSupplier()">
+              <i class="material-icons left">add</i>Add Supplier
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Types</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of prestige.listOfSupplier">
+                <td>{{ t.name }}</td>
+                <td>{{ t.types }}</td>
+                <td>
+                  <a 
+                  class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+                  (click)="onClickEditSupplier(t)"> <i class="material-icons">edit</i></a>
+                  <a 
+                  class="btn red left"
+                  (click)="onDeleteSupplier(t)"> <i class="material-icons">delete</i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="material-icons">storage</i>Section</div>
+      <div class="collapsible-body">
+        <div class="row">
+          <div class="col s3" *ngFor="let t of prestige.listOfType">
+            <p (click)="$event.preventDefault(); t.isCheck = !t.isCheck">
+              <label>
+                <input type="checkbox" [(ngModel)]="t.isCheck" />
+                <span>{{ t.name }}</span>
+              </label>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="sectionName" name="sectionName" [(ngModel)]="prestige.sectionName" placeholder="Section Name" type="text" class="validate">
+          </div>
+          <div class="col s6 btnContainer">
+            <a class="waves-effect waves-light btn" name="addSupplier" (click)="onClickAddSection()">
+              <i class="material-icons left">add</i>Add Section
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Types</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of prestige.listOfSection">
+                <td>{{ t.name }}</td>
+                <td>{{ t.types }}</td>
+                <td>
+                  <a 
+                  class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+                  (click)="onClickEditSection(t)"> <i class="material-icons">edit</i></a>
+                  <a 
+                  class="btn red left"
+                  (click)="onDeleteSection(t)"> <i class="material-icons">delete</i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="material-icons">color_lens</i>Color</div>
+      <div class="collapsible-body">
+        <div class="row">
+          <div class="col s3" *ngFor="let t of prestige.listOfType">
+            <p (click)="$event.preventDefault(); t.isCheck = !t.isCheck">
+              <label>
+                <input type="checkbox" [(ngModel)]="t.isCheck" />
+                <span>{{ t.name }}</span>
+              </label>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="sectionName" name="sectionName" [(ngModel)]="prestige.colorName" placeholder="Color Name" type="text" class="validate">
+          </div>
+          <div class="col s6 btnContainer">
+            <a class="waves-effect waves-light btn" name="addSupplier" (click)="onClickAddColor()">
+              <i class="material-icons left">add</i>Add Color
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Types</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of prestige.listOfColor">
+                <td>{{ t.name }}</td>
+                <td>{{ t.types }}</td>
+                <td>
+                  <a 
+                  class="btn yellow darken-2 left modal-trigger" href="#modalupdate"
+                  (click)="onClickEditColor(t)"> <i class="material-icons">edit</i></a>
+                  <a 
+                  class="btn red left"
+                  (click)="onDeleteColor(t)"> <i class="material-icons">delete</i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<app-modal-update 
+[editData]="prestige.type_modalUpdateFields"
+(updatedMaterial)="onClickUpdateModal($event)"
+></app-modal-update>

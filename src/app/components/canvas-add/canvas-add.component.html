@@ -1,10 +1,60 @@
 <div class="marginBottom">
   <h2>Add Item</h2>
   <app-radio-material-type (typeEmitter)=onClickRadioButton($event)></app-radio-material-type>
-
-  <div class="row">
+  <div>
+    <h4>Supplier</h4>
+    <div class="row">
+      <p *ngIf="type ==''">Please select type of material</p>
+      <div class="progress" *ngIf="prestige.supplierCheckBox.length == 0  && type !='' && type !=''">
+        <div class="indeterminate"></div>
+      </div>
+      <div class="col s3" *ngFor="let s of prestige.supplierCheckBox">
+        <p (click)="onClickCheckBox(s, $event)">
+          <label>
+            <input type="checkbox"  [(ngModel)]="s.isCheck"/>
+            <span>{{ s.name }}</span>
+          </label>
+        </p>
+      </div>
+    </div>
+    <hr>
+    <h4>Section</h4>
+    <div class="row">
+      <p *ngIf="type ==''">Please select type of material</p>
+      <div class="progress" *ngIf="prestige.sectionCheckBox.length == 0  && type !=''">
+        <div class="indeterminate"></div>
+      </div>
+      <div class="col s3" *ngFor="let s of prestige.sectionCheckBox">
+        <p (click)="onClickCheckBox(s, $event)">
+          <label>
+            <input type="checkbox"  [(ngModel)]="s.isCheck"/>
+            <span>{{ s.name }}</span>
+          </label>
+        </p>
+      </div>
+    </div>
+    <hr>
+    <h4>Color</h4>
+    <div class="row">
+      <p *ngIf="type ==''">Please select type of material</p>
+      <div class="progress" *ngIf="prestige.colorCheckBox.length == 0  && type !='' && this.type != 'Accessories'">
+        <div class="indeterminate"></div>
+      </div>
+      <div class="col s3" *ngFor="let s of prestige.colorCheckBox">
+        <p (click)="onClickCheckBox(s, $event)">
+          <label>
+            <input type="checkbox"  [(ngModel)]="s.isCheck"/>
+            <span>{{ s.name }}</span>
+          </label>
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- <div class="row">
     <div class="col s3 input-field">
       <p>Supplier</p>
+      
       <app-dropdown-color (color)="onSelectSupplier($event)" 
       [dropdownData]=" 
       type == 'Aluminum' ? prestige.dropdownSupplier : 
@@ -25,7 +75,7 @@
       [dropdownData]="type == 'Aluminum' ? prestige.dropdownColor : 
       type == 'Glass' ? prestige.dropdownGlassType : prestige.dropdownColor "></app-dropdown-color>
     </div>
-  </div>
+  </div> -->
   <div class="row" *ngFor="let m of prestige.materials; let i = index">
     <div class="input-field col s3">
       <input [attr.id]="i+'m'" [(ngModel)]="m.name" type="text" class="validate">

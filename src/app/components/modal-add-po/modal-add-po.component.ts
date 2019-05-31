@@ -25,6 +25,7 @@ export class ModalAddPoComponent implements OnInit {
   }
 
   ngOnInit() {
+    
   }
   
   onSelectSupplier(supplier){
@@ -157,7 +158,6 @@ export class ModalAddPoComponent implements OnInit {
       //   m.numberOfStock = 0;
       //   m.qty = m.stock;
       // }
-      console.log(m)
 
       if(m.type == 'Aluminum'){
         if(m.qty > 252){
@@ -203,13 +203,17 @@ export class ModalAddPoComponent implements OnInit {
   }
 
   onChangeSize(m){
-    console.log(m)
+
     if(this.switch){
-      let baseW = m.baseSize.split(' x ')[0].replace('ft','');
-      let baseH = m.baseSize.split(' x ')[1].replace('ft','');
-    
-      m.width = baseW < m.width ? baseW : m.width;
-      m.height = baseH < m.height ? baseH : m.height;
+      // let baseW = parseFloat(m.baseSize.split(' x ')[0].replace('ft','')) * 12;
+      // let baseH = parseFloat(m.baseSize.split(' x ')[1].replace('ft','')) * 12;
+      
+      // let mWidth = this.prestige.fractionToInches(m.width+'');
+      // let mHeight = this.prestige.fractionToInches(m.height+'');
+
+
+      // m.width = baseW < mWidth ? baseW : mWidth;
+      // m.height = baseH < mHeight ? baseH : mHeight;
     }
 
 

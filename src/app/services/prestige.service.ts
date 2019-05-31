@@ -182,7 +182,10 @@ export class PrestigeService {
       }
     ]
   };
- 
+
+  supplierCheckBox = [];
+  sectionCheckBox = [];
+  colorCheckBox = [];
 
   _deleteModal: any = {
     title: 'Delete',
@@ -267,21 +270,40 @@ export class PrestigeService {
     console.log(data)
     data.materials.forEach( m => {
 
-      this.fb.add('tblmaterials',
-        {
-          supplier: data.supplier,
-          section: data.section,
-          color: data.color == null ? '-': data.color,
-          materialName: m.name,
-          price: m.price,
-          type: data.type
-        }
-      ).then( () => {
-        this.M.toast(`
-          <span class="green-text">${m.name}</span>&nbsp;material has been addedd.
-        `)
-        this.materials = [];
+      data.supplier.forEach( supplier => {
+
+        data.section.forEach(section => {
+          
+          data.color.forEach( color => {
+
+            console.log({
+              supplier: supplier.name,
+              section: section.name,
+              material: m.name,
+              price: m.price,
+              color: color.name
+            })
+          
+          });
+        
+        });
+
       });
+      // this.fb.add('tblmaterials',
+      //   {
+      //     supplier: data.supplier,
+      //     section: data.section,
+      //     color: data.color == null ? '-': data.color,
+      //     materialName: m.name,
+      //     price: m.price,
+      //     type: data.type
+      //   }
+      // ).then( () => {
+      //   this.M.toast(`
+      //     <span class="green-text">${m.name}</span>&nbsp;material has been addedd.
+      //   `)
+      //   this.materials = [];
+      // });
 
     })
   }
@@ -456,7 +478,12 @@ export class PrestigeService {
               if(z.po[key].supplier == 'FROM STOCK'){
 
                 if(z.po[key].type.toLowerCase() == 'aluminum'){
-                  z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
+                  
+                  let inches = this.fractionToInches(''+z.po[key].qty);
+                  
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  console.log(inches)
+                  z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
                   * z.po[key].numberOfSet;
                   
                   subTotal+= z.po[key]['subtotal'];
@@ -464,7 +491,11 @@ export class PrestigeService {
                 }
                 else if(z.po[key].type.toLowerCase() == 'glass'){
                   console.log('PUMASOK SA TYPE GLASS')
-                  z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                  let sqft = ((xWidth * xHeight) / 144);
+                  z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
                   subTotal+= z.po[key]['subtotal'];
                 }
                 else if(z.po[key].type.toLowerCase() == 'accessories'){
@@ -474,7 +505,12 @@ export class PrestigeService {
               }
               else{
                if( z.po[key]['type'] == "Glass"){
-                z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+                let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                let sqft = ((xWidth * xHeight) / 144);
+                z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
                 
                }
                else{
@@ -514,6 +550,64 @@ export class PrestigeService {
       console.log(this.projectList)
       
     });
+  }
+
+  fractionToInches(qty){
+    let inches = qty.split(' ').length > 1 ? 
+                eval(qty.split(' ')[0]) + eval(qty.split(' ')[1]) : qty
+                
+    return inches == null || inches == 'undefined' || inches == undefined ? 0: parseFloat(inches);
+  }
+
+  roundOff(inches, type, supplier){
+
+   
+
+    if(type == 'aluminum'){
+      let x = 12;
+      while(true){
+  
+        if(inches < x){
+          console.log(inches)
+          console.log(x);
+          break;
+        }
+        x+=12;
+      }
+      return x;
+    }
+    else{
+      let x = 6;
+      while(true){
+  
+        if(inches <= x){
+          console.log(inches)
+          console.log(x);
+          break;
+        }
+
+        if(supplier == 'TRANS'){
+          x+=6;
+          console.log(supplier)
+          console.log(x)
+        }
+        else{
+         if(x >= 48){
+           x+=12;
+           console.log(supplier)
+           console.log(x);
+         }
+         else{
+           x+=6;
+           console.log(supplier)
+           console.log(x);
+         }
+        }
+        
+      }
+      return x;
+    }
+    
   }
 
   getMaterials(supplier, section, color, type){
@@ -584,7 +678,7 @@ export class PrestigeService {
   addPO(data, projectKey, date, isFromStock){
     console.log(data)
     // console.log(data[0].supplier)
-
+    this.addingPOLoader = true;
     
 
     if(isFromStock){
@@ -614,13 +708,17 @@ export class PrestigeService {
         this.M.toast("New PO successfully added")
        
         this.projects_materialList.forEach(x => {
-          x['isShow'] = true;
           x['isCheck'] = true;
           x['qty'] = null;
           x['numberOfSet'] = null;
           x['width'] = null;
           x['height'] = null;
         });
+
+        this.stockList.forEach(x => {
+          x['isCheck'] = true;
+          x['qty'] = null;
+        })
         
       });
     }
@@ -690,9 +788,11 @@ export class PrestigeService {
     })
   }
   glassScrapCtr =0;
+  arrayGlassCutToDelete;
   getGlassCut(data, projectKey, date){
     // console.log(data);
     this.glassScrapCtr = 0;
+    this.arrayGlassCutToDelete = [];
     data.forEach( x => {
       
       this.processGlassCut(x, x.numberOfSet, 0, data, projectKey, date);
@@ -726,14 +826,14 @@ export class PrestigeService {
         for(let i = 0; i < scrap.length; i++){
           
           for(let j = 0; j < scrap.length; j++){
-            let baseW = scrap[i].scrap.split(' x ')[0].replace('ft','');
-            let baseH = scrap[i].scrap.split(' x ')[1].replace('ft','');
+            let baseW = scrap[i].scrap.split(' x ')[0].replace('in','');
+            let baseH = scrap[i].scrap.split(' x ')[1].replace('in','');
 
-            if(scrap[i].scrap.split(' x ')[0].replace('ft','') < scrap[j].scrap.split(' x ')[0].replace('ft','') ||
-              scrap[i].scrap.split(' x ')[1].replace('ft','') < scrap[j].scrap.split(' x ')[1].replace('ft','')){
+            if(scrap[i].scrap.split(' x ')[0].replace('in','') < scrap[j].scrap.split(' x ')[0].replace('in','') ||
+              scrap[i].scrap.split(' x ')[1].replace('in','') < scrap[j].scrap.split(' x ')[1].replace('in','')){
               
-                console.log(scrap[i].scrap.split(' x ')[0].replace('ft','') +'<'+ scrap[j].scrap.split(' x ')[0].replace('ft',''))
-                console.log(scrap[i].scrap.split(' x ')[1].replace('ft','') +'<'+ scrap[j].scrap.split(' x ')[1].replace('ft',''))
+                console.log(scrap[i].scrap.split(' x ')[0].replace('in','') +'<'+ scrap[j].scrap.split(' x ')[0].replace('in',''))
+                console.log(scrap[i].scrap.split(' x ')[1].replace('in','') +'<'+ scrap[j].scrap.split(' x ')[1].replace('in',''))
                 console.log('sort')
                 
               let temp = scrap[i] ;
@@ -756,26 +856,29 @@ export class PrestigeService {
           let isNotAvailable = true;
         
         let scrapToUse;
-
+          let xWidth: any = this.fractionToInches(''+x.width+'');
+          let xHeight : any= this.fractionToInches(''+x.height+'');
+        console.log(xWidth)
+        console.log(xHeight)
           for(let s of scrap){
             console.log(s)
 
-            let baseW = s.scrap.split(' x ')[0].replace('ft','');
-            let baseH = s.scrap.split(' x ')[1].replace('ft','');
+            let baseW = s.scrap.split(' x ')[0].replace('in','');
+            let baseH = s.scrap.split(' x ')[1].replace('in','');
 
             console.log(baseW +' x '+baseH);
             
-            if(baseW >= x.width && baseH >= x.height){
-
+            // if(baseW >= parseFloat(x.width) && baseH >= parseFloat(x.height)){
+            if(baseW >= xWidth && baseH >= xHeight){
               // HORIZONTAL
               let horizontal = {
-                cut01: `${(baseW - x.width)}ft x ${x.height}ft`,
-                cut02: `${baseW}ft x ${(baseH - x.height)}ft`
+                cut01: `${(baseW - xWidth)}in x ${xHeight}in`,
+                cut02: `${baseW}in x ${(baseH - xHeight)}in`
               }
 
               let vertical = {
-                cut01: `${x.width}ft x ${(baseH - x.height)}ft`,
-                cut02: `${(baseW - x.width)}ft x ${baseH}ft`
+                cut01: `${xWidth}in x ${(baseH - xHeight)}in`,
+                cut02: `${(baseW - xWidth)}in x ${baseH}in`
               }
               console.log('ilang beses pumasokkk')
               if(x.glassCutStyle)
@@ -820,11 +923,14 @@ export class PrestigeService {
   addGlassScrap(data, numberOfSet, ctr, parentData, projectKey, date){
     console.log('getting new glass scrap from tblstock');
     if(data.stock > 0){
-
+      let baseW = data.baseSize.split(' x ')[0].replace('ft','') * 12;
+      let baseH = data.baseSize.split(' x ')[0].replace('ft','') * 12;
+      
       this.fb.add('tblscrap', {
-        scrap: data.baseSize,
+        scrap: `${baseW}in x  ${baseH}in`,
         stockKey: data.stockKey
-      }).then( () => {
+      }).then( (r) => {
+        this.arrayGlassCutToDelete.push(r.key);
         console.log('Added new Scrap')
         data.stock-=1;
         this.fb.edit('tblstock', data.stockKey, {
@@ -839,7 +945,23 @@ export class PrestigeService {
 
     }
     else{
-      this.M.toast(`<span class="yellow-text">${data.materialName} </span>&nbsp;insufficient stock or scrap`);
+      console.log(parentData)
+      parentData.forEach( x => {
+        this.fb.edit('tblstock', x.stockKey, {
+          qty: x.numberOfStock
+        }).then( () =>{
+          this.addingPOLoader = false;
+          this.M.toast(`<span class="yellow-text">${data.materialName} </span>&nbsp;insufficient stock or scrap`);
+        })
+      });
+
+      this.arrayGlassCutToDelete.forEach( key => {
+        this.fb.delete('tblscrap', key)
+        .then(() =>{
+          console.log(`${key} deleted`)
+        });
+      });
+      
     }
   }
 
@@ -893,14 +1015,14 @@ export class PrestigeService {
       if(data.cutSize == null || data.cutSize == undefined){}
       else{
         
-        if(data.cutSize.cut01.split(' x ')[0].replace('ft','') <= 0 || 
-          data.cutSize.cut01.split(' x ')[1].replace('ft','') <= 0){
+        if(data.cutSize.cut01.split(' x ')[0].replace('in','') <= 0 || 
+          data.cutSize.cut01.split(' x ')[1].replace('in','') <= 0){
             cut01Proceed = false;
             console.log(data.cutSize.cut01)
             
         }
-        else if(data.cutSize.cut02.split(' x ')[0].replace('ft','') <= 0 || 
-        data.cutSize.cut02.split(' x ')[1].replace('ft','') <= 0){
+        else if(data.cutSize.cut02.split(' x ')[0].replace('in','') <= 0 || 
+        data.cutSize.cut02.split(' x ')[1].replace('in','') <= 0){
           cut02Proceed = false;
           console.log(data.cutSize.cut02)
           
@@ -1092,7 +1214,7 @@ export class PrestigeService {
               }
   
               console.log(scrap);
-              
+              let inches: any = this.fractionToInches(''+x.qty);
               let isGetNewScrap = true;
               let countFinishSet = 0;
               
@@ -1104,9 +1226,10 @@ export class PrestigeService {
   
                 for(let s of scrap){
                   isGetNewScrap = true;
-  
-                  if(s.scrap >= x.qty){
-                    let newScrap = s.scrap - x.qty;
+                  
+
+                  if(s.scrap >= inches){
+                    let newScrap = s.scrap - inches;
                     s.scrap = newScrap;
                     // this.updateScrap(newScrap, scrap.scrapKey[ctr]);
                     isNotAvailable = false;
@@ -1179,7 +1302,7 @@ export class PrestigeService {
       this.fb.add('tblstockout', {
         date: date,
         stockKey: x.stockKey,
-        qty: x.type != 'Glass' ? x.qty : `${x.width}ft x ${x.height}ft`,
+        qty: x.type != 'Glass' ? x.qty : `${x.width}in x ${x.height}in`,
         numberOfSet: x.numberOfSet
       }).then( () => {
         console.log('out added');
@@ -1300,16 +1423,24 @@ export class PrestigeService {
           
           if(z.po[key].supplier == 'FROM STOCK'){
             if(z.po[key].type.toLowerCase() == 'aluminum'){
-                z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
-                * z.po[key].numberOfSet;
-                
-                subTotal+= z.po[key]['subtotal'];
-                console.log('from stock')
+              let inches = this.fractionToInches(''+z.po[key].qty);
+                  
+              inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+              console.log(inches)
+              z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
+              * z.po[key].numberOfSet;
+              
+              subTotal+= z.po[key]['subtotal'];
+             console.log('from stock')
               }
               else if(z.po[key].type.toLowerCase() == 'glass'){
                 console.log('PUMASOK SA TYPE GLASS')
-                z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
-                subTotal+= z.po[key]['subtotal'];
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                  let sqft = ((xWidth * xHeight) / 144);
+                  z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                  subTotal+= z.po[key]['subtotal'];
               }
               else if(z.po[key].type.toLowerCase() == 'accessories'){
                 z.po[key]['subtotal'] = z.po[key]['price'] * z.po[key]['numberOfSet'];
@@ -1318,7 +1449,12 @@ export class PrestigeService {
           }
           else{
             if( z.po[key]['type'] == "Glass"){
-              z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                let sqft = ((xWidth * xHeight) / 144);
+                z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
              }
              else{
               z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
@@ -1382,16 +1518,24 @@ export class PrestigeService {
 
           if(z.po[key].supplier == 'FROM STOCK'){
             if(z.po[key].type.toLowerCase() == 'aluminum'){
-              z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
-              * z.po[key].numberOfSet;
-              
-              subTotal+= z.po[key]['subtotal'];
-             console.log('from stock')
+              let inches = this.fractionToInches(''+z.po[key].qty);
+                  
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  console.log(inches)
+                  z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
+                  * z.po[key].numberOfSet;
+                  
+                  subTotal+= z.po[key]['subtotal'];
+                 console.log('from stock')
             }
             else if(z.po[key].type.toLowerCase() == 'glass'){
               console.log('PUMASOK SA TYPE GLASS')
-              z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
-              subTotal+= z.po[key]['subtotal'];
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                  let sqft = ((xWidth * xHeight) / 144);
+                  z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                  subTotal+= z.po[key]['subtotal'];
             }
             else if(z.po[key].type.toLowerCase() == 'accessories'){
               z.po[key]['subtotal'] = z.po[key]['price'] * z.po[key]['numberOfSet'];
@@ -1400,7 +1544,13 @@ export class PrestigeService {
           }
           else{
             if( z.po[key]['type'] == "Glass"){
-              z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+              console.log(z.po[key]['width'])
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                let sqft = ((xWidth * xHeight) / 144);
+                z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
              }
              else{
               z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
@@ -1598,16 +1748,24 @@ export class PrestigeService {
           
           if(z.po[key].supplier == 'FROM STOCK'){
             if(z.po[key].type.toLowerCase() == 'aluminum'){
-                z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * z.po[key].qty) 
-                * z.po[key].numberOfSet;
-                
-                subTotal+= z.po[key]['subtotal'];
-                console.log('from stock')
+              let inches = this.fractionToInches(''+z.po[key].qty);
+                  
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  console.log(inches)
+                  z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
+                  * z.po[key].numberOfSet;
+                  
+                  subTotal+= z.po[key]['subtotal'];
+                 console.log('from stock')
               }
               else if(z.po[key].type.toLowerCase() == 'glass'){
                 console.log('PUMASOK SA TYPE GLASS')
-                z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
-                subTotal+= z.po[key]['subtotal'];
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].suppliere);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].suppliere);
+                  // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                  let sqft = ((xWidth * xHeight) / 144);
+                  z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                  subTotal+= z.po[key]['subtotal'];
               }
               else if(z.po[key].type.toLowerCase() == 'accessories'){
                 z.po[key]['subtotal'] = z.po[key]['price'] * z.po[key]['numberOfSet'];
@@ -1616,7 +1774,12 @@ export class PrestigeService {
           }
           else{
             if( z.po[key]['type'] == "Glass"){
-              z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
+                let sqft = ((xWidth * xHeight) / 144);
+                z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
+                // z.po[key]['subtotal'] = (z.po[key]['price'] * z.po[key]['width'] * z.po[key]['height']) * z.po[key]['numberOfSet'];
              }
              else{
               z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
@@ -1874,13 +2037,14 @@ export class PrestigeService {
           let obj = {};
           obj['date'] = x.date;
           obj['qty'] = x.qty;
+          obj['baseLength'] = r[0].payload.toJSON();
           
           this.fb.retrieve(`tblmaterials/${materialKey}`)
           .subscribe( mRes => {
 
             obj['color'] = mRes[0].payload.toJSON();
             obj['materialName'] = mRes[1].payload.toJSON();
-
+            
           });
 
           this.stockInList.push(obj);
@@ -1926,4 +2090,387 @@ export class PrestigeService {
 
   }
   // STOCK
+
+
+  //TYPE
+  typeName: string;
+  listOfType: any = [];
+  type_modalUpdateFields: any = {
+    title: 'Update Type',
+    key: '',
+    fields: [
+      {
+        target: 'typeNameUpdate',
+        label: 'Type Name',
+        type: 'text',
+        value: ''
+      }
+    ]
+  };
+  
+  addType(data){
+    console.log(data)
+    this.fb.add('tbltype', {
+      name: data
+    })
+    .then(() => {
+      console.log('successfully added')
+      this.typeName = '';
+      this.M.toast(`<span class="green-text">${data}</span>&nbsp;material has been addedd.`);
+    });
+  }
+
+  getType(){
+    this.fb.retrieve('tbltype')
+    .subscribe( res => {
+      this.listOfType = [];
+      res.forEach( x => {
+        this.listOfType.unshift({
+          name: x.payload.toJSON().name,
+          key: x.payload.key,
+          isCheck: false
+        });
+
+      });
+      console.log(this.listOfType)
+    });
+  }
+
+  editType(data){
+    console.log(data)
+
+    this.fb.edit('tbltype', data.key, {
+      name: data.fields[0].value
+    })
+    .then( () => {
+      console.log('successfully Updated')
+    });
+  }
+
+  deleteType(data){
+    console.log(data)
+
+    this.fb.delete('tbltype', data.key)
+    .then(() => {
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Type has been deleted.`)
+    });
+  }
+  //TYPE
+
+  //SUPPLIER
+  supplierName: string;
+  listOfSupplier = [];
+
+  addSupplier(data) {
+    console.log(data)
+    this.fb.add('tblsupplier', data)
+    .then( () => {
+      console.log('Supplier added');
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Supplier has been addedd.`)
+    });
+  }
+
+  getSupplier(){
+    this.listOfSupplier = []; 
+    this.fb.retrieve('tblsupplier')
+    .subscribe( res => {
+     this.listOfSupplier = []; 
+     
+      res.forEach(element => {
+        let x = element.payload.toJSON();
+        let key = element.payload.key;
+        let types = x.types.split(';');
+        console.log(types)
+        console.log(x)
+        let types_ = '';
+
+        this.fb.onceRetrieve(`tbltype`)
+        .once('value',( typeRes )=> {
+          let r = typeRes.toJSON()
+
+          Object.keys(r).map((key) => {
+      
+            types.forEach(t => {
+              
+              types_ += t == key ? `${r[key].name}, ` : '';
+
+            });
+
+          });
+          
+          this.listOfSupplier.unshift({
+            name: x.name,
+            types: types_,
+            key: key
+          });
+
+          console.log(types_)
+        });
+       
+      });
+
+     
+    });
+  }
+
+  editSupplier(data){
+    
+    this.fb.edit('tblsupplier', data.key, {
+      name: data.fields[0].value
+    })
+    .then( () => {
+      console.log('successfully Updated')
+    })
+  }
+
+  deleteSupplier(data){
+    console.log(data)
+
+    this.fb.delete('tblsupplier', data.key)
+    .then(() => {
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Supplier has been deleted.`)
+    });
+  }
+  //SUPPLIER
+
+  //SECTION
+  sectionName: string;
+  listOfSection = [];
+
+  addSection(data){
+    console.log(data)
+    this.fb.add('tblsection', data)
+    .then( () => {
+      console.log('section added');
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Section has been addedd.`)
+    });
+  }
+
+  getSection(){
+    this.listOfSection = []; 
+    this.fb.retrieve('tblsection')
+    .subscribe( res => {
+     this.listOfSection = []; 
+     
+      res.forEach(element => {
+        let x = element.payload.toJSON();
+        let key = element.payload.key;
+        let types = x.types.split(';');
+        console.log(types)
+        console.log(x)
+        let types_ = '';
+
+        this.fb.onceRetrieve(`tbltype`)
+        .once('value',( typeRes )=> {
+          let r = typeRes.toJSON()
+
+          Object.keys(r).map((key) => {
+      
+            types.forEach(t => {
+              
+              types_ += t == key ? `${r[key].name}, ` : '';
+
+            });
+
+          });
+          
+          this.listOfSection.unshift({
+            name: x.name,
+            types: types_,
+            key: key
+          });
+
+          console.log(this.listOfSection)
+        });
+       
+      });
+
+     
+    });
+  }
+
+  editSection(data){
+    this.fb.edit('tblsection', data.key, {
+      name: data.fields[0].value
+    })
+    .then( () => {
+      console.log('successfully Updated')
+    })
+  }
+
+  deleteSection(data){
+    console.log(data)
+
+    this.fb.delete('tblsection', data.key)
+    .then(() => {
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Section has been deleted.`)
+    });
+  }
+  //SECTION
+
+  // COLOR
+  colorName: string;
+  listOfColor = [];
+
+  addColor(data){
+    console.log(data)
+    this.fb.add('tblcolor', data)
+    .then( () => {
+      console.log('color added')
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Color has been addedd.`)
+    });
+  }
+
+  getColor(){
+    this.listOfColor = []; 
+    this.fb.retrieve('tblcolor')
+    .subscribe( res => {
+     this.listOfColor = []; 
+     
+      res.forEach(element => {
+        let x = element.payload.toJSON();
+        let key = element.payload.key;
+        let types = x.types.split(';');
+        console.log(types)
+        console.log(x)
+        let types_ = '';
+
+        this.fb.onceRetrieve(`tbltype`)
+        .once('value',( typeRes )=> {
+          let r = typeRes.toJSON()
+
+          Object.keys(r).map((key) => {
+      
+            types.forEach(t => {
+              
+              types_ += t == key ? `${r[key].name}, ` : '';
+
+            });
+
+          });
+          
+          this.listOfColor.unshift({
+            name: x.name,
+            types: types_,
+            key: key
+          });
+
+          console.log(this.listOfColor)
+        });
+       
+      });
+
+     
+    });
+  }
+
+  editColor(data){
+    this.fb.edit('tblcolor', data.key, {
+      name: data.fields[0].value
+    })
+    .then( () => {
+      console.log('successfully Updated')
+    })
+  }
+
+  deleteColor(data){
+    console.log(data)
+
+    this.fb.delete('tblcolor', data.key)
+    .then(() => {
+      this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Color has been deleted.`)
+    });
+  }
+  // COLOR
+
+
+  getSupplierCheckBox(data){
+    console.log(data)
+   
+    this.fb.onceRetrieve('tblsupplier').once('value', (r) => {
+      let res = r.toJSON();
+      this.supplierCheckBox = [];
+      Object.keys(res).map((key) => {
+       res[key].types.match(data.key) ?  this.supplierCheckBox.push({
+         key: key,
+         name: res[key].name,
+         isCheck: false
+       }) : '';
+      });
+
+      this.supplierCheckBox.sort(function (a, b) {
+          if (a.name < b.name) {
+              return -1;
+          }
+          return 0;
+      });
+      
+      console.log(this.supplierCheckBox)
+    });
+
+    this.fb.onceRetrieve('tblsection').once('value', (r) => {
+      let res = r.toJSON();
+      this.sectionCheckBox = [];
+      Object.keys(res).map((key) => {
+       res[key].types.match(data.key) ?  this.sectionCheckBox.push({
+         key: key,
+         name: res[key].name,
+         isCheck: false
+       }) : '';
+      });
+
+      this.sectionCheckBox.sort(function (a, b) {
+          if (a.name < b.name) {
+              return -1;
+          }
+          return 0;
+      });
+      
+      console.log(this.sectionCheckBox)
+    });
+
+    this.fb.onceRetrieve('tblcolor').once('value', (r) => {
+      let res = r.toJSON();
+      this.colorCheckBox = [];
+      Object.keys(res).map((key) => {
+       res[key].types.match(data.key) ?  this.colorCheckBox.push({
+         key: key,
+         name: res[key].name,
+         isCheck: false
+       }) : '';
+      });
+
+      this.colorCheckBox.sort(function (a, b) {
+          if (a.name < b.name) {
+              return -1;
+          }
+          return 0;
+      });
+      
+      console.log(this.colorCheckBox)
+    });
+  }
+
+  editMaterialKey(){
+
+    this.fb.onceRetrieve(`tblmaterials`)
+    .once('value',( r )=> {
+      let res = r.toJSON();
+      Object.keys(res).map((key) => {
+        
+        console.log(res[key].color)
+        if(res[key].color == 'ANNEALED'){
+          // console.log(res[key].color)
+
+          // this.fb.edit('tblmaterials', key, {
+          //   color: ''
+          // })
+          // .then( () => {
+          //   console.log('successful updated')
+          // })
+
+        }
+      })
+    });
+  }
 }

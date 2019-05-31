@@ -7,8 +7,8 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 })
 export class NavComponent implements OnInit {
 
-  background: string = "../../assets/sidenav_bg.jpg";
-  icon: string = "../../assets/ico_prestige.png";
+  background: string = "./assets/sidenav_bg.jpg";
+  icon: string = "./assets/ico_prestige.png";
 
   @Output() title = new EventEmitter<string>();
 

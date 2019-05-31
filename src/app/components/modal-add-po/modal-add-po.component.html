@@ -80,17 +80,17 @@
               </div>
               <div class="row" *ngIf="m.type == 'Glass'">
                 <div class="col s6">
-                  <input type="number" placeholder="Width (ft)" step="1" [(ngModel)]="m.width"
+                  <input type="text" placeholder="Width (inches)" step="1" [(ngModel)]="m.width"
                   (change)="onChangeSize(m)" (keyup)="onChangeSize(m)">
                 </div>
                 <div class="col s6">
-                  <input type="number" placeholder="Height (ft)" step="1" [(ngModel)]="m.height"
+                  <input type="text" placeholder="Height (inches)" step="1" [(ngModel)]="m.height"
                   (change)="onChangeSize(m)" (keyup)="onChangeSize(m)">
                 </div>
               </div>
 
               <input *ngIf="switch && m.type == 'Aluminum'"
-              id="icon_prefix" type="number" placeholder="Length should not be greater than 252in" 
+              id="icon_prefix" type="text" placeholder="Length should not be greater than 252in" 
               (change)="onChangeQty(m)" (keyup)="onChangeQty(m)"[(ngModel)]="m.qty" >
               
               <input id="icon_prefix" type="number" placeholder="Quantity" step="1" 

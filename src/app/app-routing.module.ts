@@ -7,6 +7,7 @@ import { ProjectsComponent } from './components/projects/projects.component';
 import { SupplierComponent } from './components/supplier/supplier.component';
 import { PurchasesComponent } from './components/purchases/purchases.component';
 import { StocksComponent } from './components/stocks/stocks.component';
+import { SupplierSectionTypeComponent } from './components/supplier-section-type/supplier-section-type.component';
 
 const routes: Routes = [
   { 
@@ -36,6 +37,10 @@ const routes: Routes = [
   {
     path: 'stocks',
     component: StocksComponent
+  },
+  {
+    path: 'supplier-section-type',
+    component: SupplierSectionTypeComponent
   }
 ];
 

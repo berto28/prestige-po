@@ -34,8 +34,8 @@
               <td>{{ item.materialName }}</td>
               <td *ngIf="item.type != 'Accessories'">{{ item.color}}</td>
               <td>{{ item.price}}{{ item.type == 'Glass' ? '/SQFT' : ''  }}</td>
-              <td *ngIf="po['po'][0].type == 'Glass'">{{ item.width }}ft</td>
-              <td *ngIf="po['po'][0].type == 'Glass'">{{ item.height }}ft</td>
+              <td *ngIf="po['po'][0].type == 'Glass'">{{ item.width }}in</td>
+              <td *ngIf="po['po'][0].type == 'Glass'">{{ item.height }}in</td>
               <ng-container *ngIf="po['po'][0].supplier == 'FROM STOCK'">
                 <td *ngIf="item.type != 'Accessories'">{{ item.supplier == 'FROM STOCK' && item.type != 'Glass' ? item.qty : item.numberOfSet }}</td>
               </ng-container>

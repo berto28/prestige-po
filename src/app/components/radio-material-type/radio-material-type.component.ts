@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { MaterializeService } from '../../services/materialize.service';
+import { PrestigeService } from '../../services/prestige.service';
 
 @Component({
   selector: 'app-radio-material-type',
@@ -12,20 +13,21 @@ export class RadioMaterialTypeComponent implements OnInit {
   materialType: Array<string> = ['Aluminum', 'Glass', 'Accessories'];
   type = 'Aluminum';
   @Output() typeEmitter = new EventEmitter<string>();
-  constructor(public materialService: MaterializeService) { }
+  constructor(public materialService: MaterializeService, public prestige: PrestigeService) { }
 
   ngOnInit() {
+    this.prestige.getType();
   }
 
   onClickRadioButton(type, evt, i){
     evt.preventDefault();
     
     console.log(type)
-    this.type = type;
-    for(let c1 = 0; c1 < 3; c1++){
-      this.isRadioCheck[c1] = false;
-    }
-    this.isRadioCheck[i] = true;
+
+    this.prestige.listOfType.forEach(element => {
+      element.isCheck = false;
+    });
+    type.isCheck = true;
     this.typeEmitter.emit(type)
     // this.prestige.materials = [];
     this.materialService.dropdown();

@@ -16,8 +16,11 @@ export class CanvasAddComponent implements OnInit {
 
   // isRadioCheck: Array<any> = [true, false, false];
   // materialType: Array<string> = ['Aluminum', 'Glass', 'Accessories'];
-  type = 'Aluminum';
-
+  type = '';
+  arraySupplier: any  = [];
+  arraySection: any = [];
+  arrayColor: any = [];
+  
   constructor(public prestige: PrestigeService,
               public materialService: MaterializeService) {
     prestige.url = 'Canvas';
@@ -42,50 +45,86 @@ export class CanvasAddComponent implements OnInit {
     this.prestige.getCanvasUsingDropdown(this.prestige.canvas_supplierPick, this.prestige.canvas_sectionPick, this.prestige.canvas_colorPick);
   }
 
+  onClickCheckBox(supplier, e){
+    e.preventDefault();
+    supplier.isCheck = !supplier.isCheck;
+    console.log(supplier.isCheck)
+  }
+
   onClickSaveMaterial(): void {
-      let ctr = 1;
-      let isProceed = false;
 
-      let toastMessage = `Add material first by clicking "+" button before saving.`;
-      this.prestige.materials.length == 0 ? this.materialService.toast(toastMessage) : '';
+      
+    let ctr = 1;
+    let isProceed = false;
 
-      isProceed = this.prestige.canvas_supplierPick == '' || this.prestige.canvas_supplierPick == null ? false : true;
-      toastMessage = `Please pick a supplier`;
-      isProceed ? '' : this.materialService.toast(toastMessage);
-
-      isProceed = this.prestige.canvas_sectionPick == '' || this.prestige.canvas_sectionPick == null ? false : true;
-      toastMessage = `Please pick a section`;
-      isProceed ? '' : this.materialService.toast(toastMessage);
-
-      if(this.type != 'Accessories'){
-        isProceed = this.prestige.canvas_colorPick == '' || this.prestige.canvas_colorPick == null ? false : true;
-        toastMessage = `Please pick a color`;
-        isProceed ? '' : this.materialService.toast(toastMessage);
-      }
-      this.prestige.materials.forEach(element => {
-        let num = ctr == 1 ? '1st' : ctr == 2 ? '2nd' : ctr == 3 ? '3rd' : ctr+'th';
-
-        let toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>NAME</b></span>&nbspshould not be blank`;
-        isProceed = element['name'] == '' || element['name'] == null ? false : true;
     
-        isProceed ? '' : this.materialService.toast(toastMessage);
 
-        toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>Price</b></span>&nbspshould not be 0 or blank`;
-        // isProceed = element['price'] == '' || element['price'] == null ? false : true;
-        
-        isProceed ? '' : this.materialService.toast(toastMessage);
 
-        ctr+=1;
-      });
+    this.arraySupplier = [];
+    this.prestige.supplierCheckBox.forEach( x => {
+      x.isCheck ? this.arraySupplier.unshift(x) : ''
+    });
 
-      isProceed == true  ? this.saveMaterial() : false ;
+    this.arraySection = [];
+    this.prestige.sectionCheckBox.forEach( x => {
+      x.isCheck ? this.arraySection.unshift(x) : ''
+    });
+
+    this.arrayColor = [];
+    this.prestige.colorCheckBox.forEach( x => {
+      x.isCheck ? this.arrayColor.unshift(x) : ''
+    });
+
+    isProceed = this.arraySupplier.length == 0 ? false : true;
+    isProceed ? '' : this.materialService.toast(`Please pick a supplier`);
+
+    isProceed = this.arraySection.length == 0 ? false : true;
+    isProceed ? '' : this.materialService.toast(`Please pick a section`);
+
+    isProceed = this.arrayColor.length == 0 && this.type !='Accessories' ? false : true;
+    isProceed ? '' : this.materialService.toast(`Please pick a color`);
+    // isProceed = this.prestige.canvas_supplierPick == '' || this.prestige.canvas_supplierPick == null ? false : true;
+    // toastMessage = `Please pick a supplier`;
+    // isProceed ? '' : this.materialService.toast(toastMessage);
+
+    // isProceed = this.prestige.canvas_sectionPick == '' || this.prestige.canvas_sectionPick == null ? false : true;
+    // toastMessage = `Please pick a section`;
+    // isProceed ? '' : this.materialService.toast(toastMessage);
+
+    // if(this.type != 'Accessories'){
+    //   isProceed = this.prestige.canvas_colorPick == '' || this.prestige.canvas_colorPick == null ? false : true;
+    //   toastMessage = `Please pick a color`;
+    //   isProceed ? '' : this.materialService.toast(toastMessage);
+    // }
+
+    let toastMessage = `Add material first by clicking "+" button before saving.`;
+    this.prestige.materials.length == 0 ? this.materialService.toast(toastMessage) : '';
+    isProceed = this.prestige.materials.length == 0 ? false : true;
+    
+    this.prestige.materials.forEach(element => {
+      let num = ctr == 1 ? '1st' : ctr == 2 ? '2nd' : ctr == 3 ? '3rd' : ctr+'th';
+
+      let toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>NAME</b></span>&nbspshould not be blank`;
+      isProceed = element['name'] == '' || element['name'] == null ? false : true;
+  
+      isProceed ? '' : this.materialService.toast(toastMessage);
+
+      toastMessage = `${num} Material&nbsp;<span class="yellow-text"><b>Price</b></span>&nbspshould not be 0 or blank`;
+      // isProceed = element['price'] == '' || element['price'] == null ? false : true;
+      
+      isProceed ? '' : this.materialService.toast(toastMessage);
+
+      ctr+=1;
+    });
+
+    isProceed == true  ? this.saveMaterial() : false ;
   }
 
   saveMaterial(){
     let obj = {
-      supplier: this.prestige.canvas_supplierPick,
-      section: this.prestige.canvas_sectionPick,
-      color: this.prestige.canvas_colorPick,
+      supplier: this.arraySupplier,
+      section: this.arraySection,
+      color: this.arrayColor,
       materials: this.prestige.materials,
       type: this.type
     };
@@ -108,7 +147,10 @@ export class CanvasAddComponent implements OnInit {
   }
 
   onClickRadioButton(type){
-    this.type = type;
+    console.log(type)
+    this.type = type.name;
+
+    this.prestige.getSupplierCheckBox(type);
   }
 
 }

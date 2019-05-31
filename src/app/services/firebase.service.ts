@@ -23,6 +23,10 @@ export class FirebaseService {
     return this.fb.list(url,(ref) => ref.orderByChild(key).equalTo(value)).snapshotChanges();
   }
 
+  retrieveWithConditionMatch(url, key, value): any{
+    return this.fb.list(url,(ref) => ref.orderByChild(key).startAt('-').endAt(value));
+  }
+
   retrieveOnce(url, key, value){
     return this.fb.list(url,(ref) => ref.orderByChild(key).equalTo(value)).query;
   }

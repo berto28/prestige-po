@@ -14,7 +14,8 @@ export class CanvasTableComponent implements OnInit {
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
-    this.prestige.getCanvas();
+    // this.prestige.getCanvas();
+    this.prestige.editMaterialKey();
     this.onWindowScroll();
   }
 
