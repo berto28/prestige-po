@@ -20,7 +20,7 @@ export class CanvasAddComponent implements OnInit {
   arraySupplier: any  = [];
   arraySection: any = [];
   arrayColor: any = [];
-  
+  typeKey = '';
   constructor(public prestige: PrestigeService,
               public materialService: MaterializeService) {
     prestige.url = 'Canvas';
@@ -45,10 +45,39 @@ export class CanvasAddComponent implements OnInit {
     this.prestige.getCanvasUsingDropdown(this.prestige.canvas_supplierPick, this.prestige.canvas_sectionPick, this.prestige.canvas_colorPick);
   }
 
-  onClickCheckBox(supplier, e){
+  onClickCheckBox(supplier, e, option){
     e.preventDefault();
     supplier.isCheck = !supplier.isCheck;
     console.log(supplier.isCheck)
+    
+    if(option == 'supplier'){
+      let arrSupplier = [];
+      this.prestige.supplierCheckBox.forEach( x => {
+        x.isCheck ? arrSupplier.unshift(x) : ''
+      });
+
+      
+      this.prestige.getCanvasUsingSupplier(arrSupplier.length == 0 ? null : arrSupplier)
+    }
+
+    else if(option == 'section'){
+      let arraySection = [];
+      this.prestige.sectionCheckBox.forEach( x => {
+        x.isCheck ? arraySection.unshift(x) : ''
+      });
+
+      this.prestige.getCanvasUsingSection(arraySection.length == 0 ? null : arraySection)
+    }
+
+    else if(option == 'color'){
+      let arrColor = [];
+      this.prestige.colorCheckBox.forEach( x => {
+        x.isCheck ? arrColor.unshift(x) : ''
+      });
+
+      this.prestige.getCanvasUsingColor(arrColor.length == 0 ? null : arrColor)
+    }
+   
   }
 
   onClickSaveMaterial(): void {
@@ -126,7 +155,7 @@ export class CanvasAddComponent implements OnInit {
       section: this.arraySection,
       color: this.arrayColor,
       materials: this.prestige.materials,
-      type: this.type
+      type: this.typeKey
     };
 
     this.prestige.addCanvas(obj);
@@ -147,10 +176,10 @@ export class CanvasAddComponent implements OnInit {
   }
 
   onClickRadioButton(type){
-    console.log(type)
     this.type = type.name;
-
+    this.typeKey = type.key;
     this.prestige.getSupplierCheckBox(type);
+    this.prestige.getCanvasUsingType(type);
   }
 
 }

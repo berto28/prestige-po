@@ -1,5 +1,13 @@
 <div>
   <h2>Stock Materials <a class="waves-effect waves-light btn modal-trigger" href="#modalStockPO">View PO</a></h2>
+  <div class="row">
+    <div class="input-field col s6">
+      <input  type="text" class="validate" placeholder="Search by material name" [(ngModel)]="search" (keyup)="onKeyupSearch()">
+    </div>
+    <div class="col s6 searchMessageContainer" *ngIf="prestige.stockList.length == 0 && search != ''">
+      <p class="red-text">There's no "{{search}}" material name in the price list</p>
+    </div>
+  </div>
   <div class="progress" *ngIf="prestige.progressStockstable">
     <div class="indeterminate"></div>
   </div>

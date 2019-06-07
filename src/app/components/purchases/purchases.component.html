@@ -27,7 +27,7 @@
                         <ng-container *ngFor="let p of prestige.purchases_poList">
                             <tr *ngIf="p.isShow">
                                 <td class="teal-text">{{ p.date }}</td>
-                                <td>{{ p.poKey }}</td>
+                                <td>{{ p.poNumber }}</td>
                                 <td>{{ p.projectName }}</td>
                                 <td>{{ p.po[0].supplier }}</td>
                                 <td>{{ p.subTotal }}</td>

@@ -8,7 +8,9 @@ import { PrestigeService } from '../../services/prestige.service';
 })
 export class ModalAddStockComponent implements OnInit {
 
-  constructor(public prestige: PrestigeService) { }
+  constructor(public prestige: PrestigeService) { 
+    prestige.getSupplier();
+  }
 
   supplierPick: string = null;
   colorPick: any = null;
@@ -94,6 +96,7 @@ export class ModalAddStockComponent implements OnInit {
     this.prestige.dropdownSection['text'] = 'Choose Section';
     this.prestige.dropdownSupplier['text'] = 'Choose Supplier';
     this.prestige.projects_materialList = [];
+    this.prestige.getSupplierCheckBox(type);
     this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
   }
 

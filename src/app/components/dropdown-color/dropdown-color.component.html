@@ -6,6 +6,6 @@
   <!-- Dropdown Structure -->
   <ul [attr.id]="dropdownData.target" class='dropdown-content'>
     <li *ngFor="let c of dropdownData.arr">
-      <a (click)="onClickColor(c)" class="yellow-text text-darken-2">{{c}}</a>
+      <a (click)="onClickColor(c)" class="yellow-text text-darken-2">{{c.name}}</a>
     </li>
   </ul>

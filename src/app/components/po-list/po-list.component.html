@@ -2,7 +2,7 @@
   <div class="card" *ngFor="let po of poList">
     <ng-container *ngIf="po.isShow">
       <div class="card-content">
-        <span class="card-title teal-text"><b>PO #{{po.poKey}}</b> <span class="right">{{po.date}}</span></span>
+        <span class="card-title teal-text"><b>PO #{{po.poNumber}}</b> <span class="right">{{po.date}}</span></span>
         <span class="card-title teal-text">{{po.projectName}}</span>
         <table class="highlight centered">
           <thead>
@@ -68,28 +68,34 @@
         </table>
         
       </div>
-      <div class="right-align">
-        <a *ngIf="po['po'][0].supplier != 'FROM STOCK'"
-        class="btn waves-effect" [ngClass]="po.paid? poClass.paid : poClass.unpaid"
-        (click)="onClickPayPO(po.poKey)">
-        <i class="material-icons right" *ngIf="po.paid">check</i>
-          <!-- {{po.paid ? 'Paid' : 'Unpaid' }} -->
-          {{ po.paid.paidBy == 'check' ? 
-             (po.paid.date+' | Paid by check#'+po.paid.check) :
-             po.paid.paidBy == 'cash' ?
-             (po.paid.date+' | Paid by Cash | discount '+po.paid.discount+'%') : 
-             'Unpaid' }}
-        </a>
-        <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
-        class="btn waves-effect disabled">
-          from stock
-        </a>
-        <!-- <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
-            class="btn waves-effect modal-trigger"
-            href="#cuttingList"
-        (click)="onClickViewCuttingList(po['po'])">
-          view cutting list
-        </a> -->
+      <div class="row">
+        <div class="col s6">
+          <a class="btn red" (click)="cancelPO(po)">cancel po</a>
+        </div>
+        <div class="col s6 right-align">
+          <a *ngIf="po['po'][0].supplier != 'FROM STOCK'"
+          class="btn waves-effect" [ngClass]="po.paid? poClass.paid : poClass.unpaid"
+          (click)="onClickPayPO(po.poKey)">
+          <i class="material-icons right" *ngIf="po.paid">check</i>
+            <!-- {{po.paid ? 'Paid' : 'Unpaid' }} -->
+            {{ po.paid.paidBy == 'check' ? 
+               (po.paid.date+' | Paid by check#'+po.paid.check) :
+               po.paid.paidBy == 'cash' ?
+               (po.paid.date+' | Paid by Cash | discount '+po.paid.discount+'%') : 
+               'Unpaid' }}
+          </a>
+          <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
+          class="btn waves-effect disabled">
+            from stock
+          </a>
+          <!-- <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
+              class="btn waves-effect modal-trigger"
+              href="#cuttingList"
+          (click)="onClickViewCuttingList(po['po'])">
+            view cutting list
+          </a> -->
+        </div>
       </div>
+      
   </ng-container>
   </div>

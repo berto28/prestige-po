@@ -10,21 +10,24 @@ export class CanvasTableComponent implements OnInit {
   
   startFrom: number = 0;
   toEnd: number = 20;
-
+  search = ''
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
-    // this.prestige.getCanvas();
-    this.prestige.editMaterialKey();
+
+    if(this.prestige.materialList.length == 0){
+      console.log('getting canvas')
+      this.prestige.getCanvas();
+    }
+    
     this.onWindowScroll();
   }
 
   onWindowScroll(){
     window.onscroll = _ => {
       var d = document.documentElement;
-      var offset = d.scrollTop + window.innerHeight;
+      var offset = d.scrollTop + window.innerHeight + 20;
       var height = d.offsetHeight;
-     
       if (offset >= height) {
         this.toEnd+=20;
       }
@@ -56,5 +59,11 @@ export class CanvasTableComponent implements OnInit {
 
   onClickViewAll(): void{
     this.prestige.viewAllCanvas();
+  }
+
+  onKeyupSearch(){
+
+    this.prestige.searchCanvas(this.search.toLowerCase());
+    // console.log(this.search)
   }
 }

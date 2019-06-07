@@ -11,6 +11,7 @@ export class PrestigeService {
   url: string = 'Projects';
   addingPOLoader = false;
 
+  poNumber: string = '';
   //////////////////////////////// canvas
   dropdownColor: any = {
     target: 'dropdownColor',
@@ -218,6 +219,19 @@ export class PrestigeService {
   }
 
   cuttingList = [];
+  
+  project_modalUpdateFields: any = {
+    title: 'Update Project Name',
+    key: '',
+    fields: [
+      {
+        target: 'ProjectName',
+        label: 'Project Name',
+        type: 'text',
+        value: ''
+      }
+    ]
+  };
 /////////////////////////////// projects
 
 ///////////////////////////////supplier
@@ -268,23 +282,63 @@ export class PrestigeService {
   // CANVAS
   addCanvas(data): void{
     console.log(data)
-    data.materials.forEach( m => {
+   
+    data.supplier.forEach( supplier => {
 
-      data.supplier.forEach( supplier => {
+      data.section.forEach(section => {
+        
+        data.materials.forEach( m => {
 
-        data.section.forEach(section => {
-          
-          data.color.forEach( color => {
+          if(data.color.length == 0){
 
-            console.log({
-              supplier: supplier.name,
-              section: section.name,
-              material: m.name,
+            this.fb.add('tblmaterials',
+            {
+              supplier: supplier.key,
+              section: section.key,
+              materialName: m.name,
               price: m.price,
-              color: color.name
-            })
+              color: '-',
+              type: data.type
+            }
+            ).then( () => {
+              this.M.toast(`
+                <span class="green-text">${m.name}</span>&nbsp;material has been addedd.
+              `)
+              this.materials = [];
+            });
+          }
+          else{
+
+            data.color.forEach( color => {
+
+              // console.log({
+              //   supplier: supplier.key,
+              //   section: section.key,
+              //   material: m.name,
+              //   price: m.price,
+              //   color: color.key,
+              //   type: data.type
+              // })
+
+              this.fb.add('tblmaterials',
+                {
+                  supplier: supplier.key,
+                  section: section.key,
+                  materialName: m.name,
+                  price: m.price,
+                  color: color.key,
+                  type: data.type
+                }
+              ).then( () => {
+                this.M.toast(`
+                  <span class="green-text">${m.name}</span>&nbsp;material has been addedd.
+                `)
+                this.materials = [];
+              });
+            
+            });
+          }
           
-          });
         
         });
 
@@ -330,23 +384,314 @@ export class PrestigeService {
       this.M.toast(`<span class="yellow-text">${data.materialName}</span>&nbsp;has been deleted.`);
     });
   }
+  searchText = '';
+  searchCanvas(search){
+    this.searchText = search;
+    this.materialList = [];
+    this.toBeSearch.forEach( x => {
+      x['materialName'].toLowerCase().match(search) ? this.materialList.push(x) : '';
+    });
+    
+  }
+
+  searchStock(search){
+    this.stockList = [];
+    this.stockList_.forEach( x => {
+      x['materialName'].toLowerCase().match(search) ? this.stockList.push(x) : '';
+    });
+  }
+
+
+  materialType = null;
+  materialSupplier = null;
+  materialSection = null;
+  materialColor = null;
 
   getCanvas(): void{
-    
+   
     this.fb.retrieve('tblmaterials')
     .subscribe( res => {
       this.materialList = [];
       res.forEach( element => {
+        let ctr = 0;
         let x = element.payload.toJSON();
         x['key'] = element.key;
+        x['discount'] = '.0';
+        x['sellingPrice'] = 0;
+        this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
+             
+          let typeRes = rType.toJSON();
+          let typeKey = x.type;
+          x['type'] = typeRes['name'];
+          x['typeKey'] = typeKey;
+          // ctr+=1;
+          // if(ctr >= 4){
+          //   this.materialList.unshift(x);
+          //   console.log(this.materialList)
+          //   ctr = 0;
+          // }
+        
+        });
 
-         this.materialList.unshift(x);
+        this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
+          let supplierRes = rSupplier.toJSON();
+          let supplierKey = x.supplier;
 
+          x['supplier'] = supplierRes['name'];
+          x['supplierKey'] = supplierKey;
+          x['discount'] = supplierRes['discount'];
+          x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+          // ctr+=1;
+          // if(ctr >= 4){
+          //   this.materialList.unshift(x);
+          //   console.log(this.materialList)
+          //   ctr = 0;
+          // }
+
+          
+
+        });
+
+        this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
+          let sectionRes = rSection.toJSON();
+          let sectionKey = x.section;
+          x['section'] = sectionRes['name'];
+          x['sectionKey'] = sectionKey;
+
+          // ctr+=1;
+          // if(ctr >= 4){
+          //   this.materialList.unshift(x);
+          //   console.log(this.materialList)
+          //   ctr = 0;
+          // }
+          
+        });
+
+        this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
+             
+          let colorRes = rColor.toJSON();
+          if(colorRes != null){
+            let colorKey = x.color;
+            
+            x['color'] = colorRes['name'];
+            x['colorKey'] = colorKey;
+
+          }
+         
+          // ctr+=1;
+          // if(ctr >= 4){
+          //   this.materialList.unshift(x);
+          //   console.log(this.materialList)
+          //   ctr = 0;
+          // }
+        });
+
+        this.materialList.unshift(x);
+       
+        
+        
       });
       this.materialList_ = this.materialList;
       console.log(this.materialList)
-      this.getCanvasUsingDropdown(this.canvas_supplierPick, this.canvas_sectionPick, this.canvas_colorPick)
+      // this.getCanvasUsingDropdown(this.canvas_supplierPick, this.canvas_sectionPick, this.canvas_colorPick)
+      this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
     });
+  }
+  toBeSearch = [];
+  filterCanvas(typeKey, supplierKey, sectionKey, colorKey){
+    console.log(typeKey +' -- ' + supplierKey +' -- ' + sectionKey +' -- ' + colorKey)
+
+    let newList = [];
+    this.materialList_.forEach( x => {
+
+      if(typeKey == x['typeKey'] && 
+        supplierKey == null && 
+        sectionKey == null && 
+        colorKey == null){
+
+        newList.unshift(x);
+      }
+
+      else if(typeKey == x['typeKey'] && 
+              supplierKey != null && 
+              sectionKey == null && 
+              colorKey == null){
+              
+              supplierKey.forEach(s => {
+
+                if(x['supplierKey'] == undefined){
+                  s.key == x['supplier'] ? newList.unshift(x) : '';
+                }
+                else{
+                  s.key == x['supplierKey'] ? newList.unshift(x) : '';
+                }
+
+               
+              });
+      }
+
+      else if(typeKey == x['typeKey'] && 
+              supplierKey == null && 
+              sectionKey != null && 
+              colorKey == null){
+              
+              sectionKey.forEach(s => {
+
+                if(x['sectionKey'] == undefined){
+
+                  s.key == x['section'] ? newList.unshift(x) : '';
+
+                }
+                else{
+                  s.key == x['sectionKey'] ? newList.unshift(x) : '';
+                }
+              });
+      }
+
+      else if(typeKey == x['typeKey'] && 
+              supplierKey == null && 
+              sectionKey == null && 
+              colorKey != null){
+                
+                colorKey.forEach(s => {
+
+                  if(x['colorKey'] == undefined){
+                    s.key == x['color'] ? newList.unshift(x) : '';
+                  }
+                  else{
+                    s.key == x['colorKey'] ? newList.unshift(x) : '';
+                  }
+                  
+                });
+      }
+
+      else if(typeKey == x['typeKey'] && 
+              supplierKey != null && 
+              sectionKey != null && 
+              colorKey == null){
+              console.log(supplierKey)
+              console.log(x['supplierkey'])
+              console.log(x['sectionKey'])
+              supplierKey.forEach(sup => {
+              
+                sectionKey.forEach(sec => {
+                
+                 if(x['supplierkey'] == undefined && x['sectionKey'] == undefined){
+                  sup.key == x['supplier'] && sec.key == x['section'] ?
+                  newList.unshift(x) : '';
+                 }
+                 else{
+                  sup.key == x['supplierKey'] && sec.key == x['sectionKey'] ?
+                  newList.unshift(x) : '';
+                 }
+                 
+
+                });
+                
+              });
+      }
+
+      else if(typeKey == x['typeKey'] && 
+              supplierKey != null && 
+              sectionKey == null && 
+              colorKey != null){
+
+                supplierKey.forEach(sup => {
+              
+                  colorKey.forEach(col => {
+                    if(x['supplierkey'] == undefined && x['colorKey'] == undefined){
+                      sup.key == x['supplier'] && col.key == x['color'] ?
+                      newList.unshift(x) : '';
+                    }
+                    else{
+                      sup.key == x['supplierKey'] && col.key == x['colorKey'] ?
+                      newList.unshift(x) : '';
+                    }
+                    
+  
+                  });
+                  
+                });
+      }
+      else if(typeKey == x['typeKey'] && 
+              supplierKey == null && 
+              sectionKey != null && 
+              colorKey != null){
+              
+                sectionKey.forEach(sec => {
+                
+                  colorKey.forEach(col => {
+                    if(x['sectionKey'] == undefined && x['colorKey'] == undefined){
+                      sec.key == x['section'] && col.key == x['color'] ?
+                        newList.unshift(x) : '';
+                    }
+                    else{
+                      sec.key == x['sectionKey'] && col.key == x['colorKey'] ?
+                        newList.unshift(x) : '';
+                    }
+
+                  });
+
+                });
+      }
+
+       else if(typeKey == x['typeKey'] && 
+              supplierKey != null && 
+              sectionKey != null && 
+              colorKey != null){
+
+                supplierKey.forEach(sup => {
+                  sectionKey.forEach(sec => {
+
+                    colorKey.forEach(col => {
+                      if(x['supplierkey'] == undefined && x['sectionKey'] == undefined && x['colorKey'] == undefined){
+                        sup.key == x['supplier'] && sec.key == x['section'] && col.key == x['color'] ?
+                      newList.unshift(x) : '';
+                      }
+                      else{
+                        sup.key == x['supplierKey'] && sec.key == x['sectionKey'] && col.key == x['colorKey'] ?
+                        newList.unshift(x) : '';
+                      }
+                    });
+
+                  });
+                  
+                });
+      }
+
+    });
+    console.log(newList)
+    this.materialList = newList;
+    this.toBeSearch = newList;
+
+    this.searchCanvas(this.searchText);
+  }
+
+  getCanvasUsingSupplier(supplier){
+    console.log(supplier)
+    this.materialSupplier = supplier;
+    this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
+  }
+
+  getCanvasUsingSection(section){
+    console.log(section)
+    this.materialSection = section;
+    this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
+  }
+
+  getCanvasUsingColor(color){
+    console.log(color)
+    this.materialColor = color;
+    this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
+  }
+
+  getCanvasUsingType(type){
+    this.materialType = type.key;
+    this.materialSupplier = null;
+    this.materialSection = null;
+    this.materialColor = null;
+    
+    this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
   }
 
   getCanvasUsingDropdown(supplier, section, color): void{
@@ -461,12 +806,30 @@ export class PrestigeService {
 
       });
 
-      this.projectList.forEach(x => {
+      this.fb.retrieve('tblpo').subscribe((res) => {
 
+        if(res.length != 0){
+          let currentPONumber: any;
+          res.forEach( x => {
+            currentPONumber = x.payload.toJSON().poNumber;
+          })
+
+          let today = new Date();
+          let mm = String(today.getMonth() + 1).padStart(2, '0');
+          let yy = today.getFullYear();
+          console.log(currentPONumber.split(`${yy}_${mm}`))
+          this.poNumber = `${yy}_${mm}${parseInt(currentPONumber.split(`${yy}_${mm}`)[1])+1}`;
+          console.log(this.poNumber)
+        }
+      });
+      
+      this.projectList.forEach(x => {
+        
         this.fb.retrieveWithCondition('tblpo', 'projectKey', x.key)
         .subscribe((res) => {
           let arr= [];
           let total = 0;
+          
           res.forEach(element => {
             let z = element.payload.toJSON();
             console.log(z)
@@ -474,6 +837,39 @@ export class PrestigeService {
             let subTotal = 0;
 
             Object.keys(z.po).map((key) => {
+              console.log(z.po[key].typeKey)
+              this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
+             
+                let typeRes = rType.toJSON();
+                if(typeRes != null){
+                 z.po[key]['type'] = typeRes['name'];
+                }
+              });
+    
+    
+              this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
+                let supplierRes = rSupplier.toJSON();
+                if(supplierRes != null){
+                 z.po[key].supplier = supplierRes['name'];
+                }
+              });
+    
+              this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
+                let sectionRes = rSection.toJSON();
+                if(sectionRes != null){
+                  z.po[key].section = sectionRes['name'];
+                }
+              });
+
+              this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
+                   
+                let colorRes = rColor.toJSON();
+                if(colorRes != null){
+                  
+                  z.po[key].color = colorRes['name'];
+      
+                }
+              });
 
               if(z.po[key].supplier == 'FROM STOCK'){
 
@@ -526,22 +922,26 @@ export class PrestigeService {
             });
 
             if(z.paid.paidBy == 'cash'){
-              subTotal -= subTotal * z.paid.discount;
+              subTotal -= subTotal * z.paid.discount; 
             }
 
             total += subTotal;
 
+            
+
             arr.unshift({
               po: poArr,
               poKey: element.key,
+              poNumber: z.poNumber,
               date: z.date,
               subTotal: subTotal,
               paid: z.paid,
               projectName: x.name,
               isShow: true
             });
-
+          
           });
+          
           x['po'] = arr;
           x['total'] = total;
         })
@@ -611,15 +1011,57 @@ export class PrestigeService {
   }
 
   getMaterials(supplier, section, color, type){
+    // console.log(supplier)
+    // console.log(section)
+    // console.log(color)
+    // console.log(type);
     if(supplier != null){
       this.projects_materialList = [];
 
-      this.fb.retrieveWithCondition('tblmaterials', 'supplier', supplier)
+      this.fb.retrieveWithCondition('tblmaterials', 'supplier', supplier.key)
       .subscribe( (res) => {
         this.projects_materialList = [];
         res.forEach(element => {
-
           let x = element.payload.toJSON();
+          
+          this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
+             
+            let typeRes = rType.toJSON();
+            let typeKey = x.type;
+            x['type'] = typeRes['name'];
+            x['typeKey'] = typeKey;
+          });
+
+
+          this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
+            let supplierRes = rSupplier.toJSON();
+            let supplierKey = x.supplier;
+  
+            x['supplier'] = supplierRes['name'];
+            x['supplierKey'] = supplierKey;
+
+            x['discount'] = supplierRes['discount'];
+            x['price'] = x['price'] - (x['price'] * x['discount']);
+          });
+
+          this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
+            let sectionRes = rSection.toJSON();
+            let sectionKey = x.section;
+            x['section'] = sectionRes['name'];
+            x['sectionKey'] = sectionKey;
+          });
+
+          this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
+               
+            let colorRes = rColor.toJSON();
+            if(colorRes != null){
+              let colorKey = x.color;
+              
+              x['color'] = colorRes['name'];
+              x['colorKey'] = colorKey;
+  
+            }
+          });
           // x.section == data.section ? this.projects_materialList.unshift(x) : ''
           x['isShow'] = true;
           x['isCheck'] = true;
@@ -631,7 +1073,7 @@ export class PrestigeService {
           this.projects_materialList.unshift(x);
         })
         // console.log(section, color)
-        console.log(this.projects_materialList)
+        // console.log(this.projects_materialList)
         this.sortMaterials(section, color, type)
       })
     }
@@ -639,19 +1081,39 @@ export class PrestigeService {
 
   sortMaterials(section, color, type){
     console.log(section+'---'+color)
-
+    console.log(color)
     this.projects_materialList.forEach( m =>  {
+      
+      if(type.key == m.typeKey){
 
-      if(type == m.type){
-        
         if(section != null && color == null){
-          m.isShow = m.section == section ? true : false;
+
+          if(m.section[0] == '-'){
+            m.isShow = m.section == section.key ? true : false;
+          }
+          else{
+            m.isShow = m.section == section.name ? true : false;
+          }
+         
         }
         else if(section == null && color != null){
-          m.isShow = m.color == color ? true : false;
+          if(m.color[0] == '-'){
+            m.isShow = m.color == color.key ? true : false;
+          }
+          else{
+            m.isShow = m.color == color.name ? true : false;
+          }
+         
         }
         else if(section != null && color != null){
-          m.isShow = section == m.section && color == m.color ? true : false;
+
+          if(m.section[0] == '-' && m.color[0] == '-'){
+            m.isShow = section.key == m.section && color.key == m.color ? true : false;
+          }
+          else{
+            m.isShow = section.name == m.section && color.name == m.color ? true : false;
+          }
+          
         }
         else{
           m.isShow = true;
@@ -694,33 +1156,50 @@ export class PrestigeService {
       }
     }
     else{
-      this.addingPOLoader = false;
-      this.fb.add(`tblpo`, {
-        po: data,
-        projectKey: projectKey,
-        supplier: data[0].supplier,
-        date: date,
-        paid: false
-      })
-      .then( () => {
-        console.log('PO ADDED');
-       
-        this.M.toast("New PO successfully added")
-       
-        this.projects_materialList.forEach(x => {
-          x['isCheck'] = true;
-          x['qty'] = null;
-          x['numberOfSet'] = null;
-          x['width'] = null;
-          x['height'] = null;
-        });
 
-        this.stockList.forEach(x => {
-          x['isCheck'] = true;
-          x['qty'] = null;
-        })
-        
-      });
+      if(this.poNumber == ''){
+        let today = new Date();
+          let mm = String(today.getMonth() + 1).padStart(2, '0');
+          let yy = today.getFullYear();
+          
+
+          this.poNumber = `${yy}_${mm}1`;
+          console.log(`${yy}_${mm}1`);
+      }
+          
+
+          this.fb.add(`tblpo`, {
+            po: data,
+            poNumber: this.poNumber,
+            projectKey: projectKey,
+            supplier: data[0].supplier,
+            supplierKey: data[0].supplier == 'FROM STOCK' ? '-': data[0].supplierKey,
+            date: date,
+            paid: false
+          })
+          .then( () => {
+            console.log('PO ADDED');
+           
+            this.M.toast("New PO successfully added")
+           
+            this.projects_materialList.forEach(x => {
+              x['isCheck'] = true;
+              x['qty'] = null;
+              x['numberOfSet'] = null;
+              x['width'] = null;
+              x['height'] = null;
+            });
+    
+            this.stockList.forEach(x => {
+              x['isCheck'] = true;
+              x['qty'] = null;
+              x['numberOfSet'] = null;
+            })
+            
+          });
+      
+      this.addingPOLoader = false;
+     
     }
     // this.fb.add(`tblpo`, {
     //   po: data,
@@ -1401,12 +1880,51 @@ export class PrestigeService {
     //   this.M.toastDismiss();
     // });
   }
+
+  editProjectName(data){
+    console.log(data);
+    this.fb.edit('tblprojects', data.key, {
+      projectName: data.fields[0].value,
+    })
+    .then( () => {
+      this.M.toast(`Project name updated to &nbsp;<b>${data.fields[0].value}</b>`)
+    })
+    
+  }
+
+  deleteProject(data){
+    console.log(data)
+    this.fb.delete('tblprojects', data.key)
+    .then(() => this.M.toast(`Project <b> ${data.name} </b> deleted`));
+  }
+
+  cancelPO(data){
+    console.log(data)
+    let toDeleteArr = [];
+
+    this.fb.delete('tblpo', data.poKey).then(() => {
+      this.M.toast(`PO #${data.poNumber} is been canceled.`);
+    })
+
+    // if(data.po[0].supplier == 'FROM STOCK'){
+    //   data.po.forEach(x => {
+    //     // console.log(x);
+  
+    //     this.fb.onceRetrieve(`tblstock/${x.stockKey}`).once( 'value', (r) => {
+    //       let res = r.toJSON();
+  
+    //       console.log(res)
+    //      });
+    //   }); 
+    // }
+   
+  }
   // PROJECT
 
 
   // SUPPLIER
   getPOUsingSupplier(supplier){
-    this.fb.retrieveWithCondition('tblpo', 'supplier', supplier)
+    this.fb.retrieveWithCondition('tblpo', 'supplierKey', supplier.key)
     .subscribe( res => {
       this.poList = [];
       let total = 0;
@@ -1419,6 +1937,39 @@ export class PrestigeService {
 
         Object.keys(z.po).map((key) => {
           z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
+
+          this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
+             
+            let typeRes = rType.toJSON();
+            if(typeRes != null){
+             z.po[key]['type'] = typeRes['name'];
+            }
+          });
+
+
+          this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
+            let supplierRes = rSupplier.toJSON();
+            if(supplierRes != null){
+             z.po[key].supplier = supplierRes['name'];
+            }
+          });
+
+          this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
+            let sectionRes = rSection.toJSON();
+            if(sectionRes != null){
+              z.po[key].section = sectionRes['name'];
+            }
+          });
+
+          this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
+               
+            let colorRes = rColor.toJSON();
+            if(colorRes != null){
+              
+              z.po[key].color = colorRes['name'];
+  
+            }
+          });
           
           
           if(z.po[key].supplier == 'FROM STOCK'){
@@ -1478,6 +2029,7 @@ export class PrestigeService {
           this.poList.unshift({
             po: poArr,
             poKey: element.key,
+            poNumber: z.poNumber,
             date: z.date,
             subTotal: subTotal,
             paid: z.paid,
@@ -1577,6 +2129,7 @@ export class PrestigeService {
             this.purchases_poList.unshift({
               po: poArr,
               poKey: element.key,
+              poNumber: z.poNumber,
               date: z.date,
               subTotal: subTotal,
               paid: z.paid,
@@ -1590,6 +2143,7 @@ export class PrestigeService {
           this.purchases_poList.unshift({
             po: poArr,
             poKey: element.key,
+            poNumber: z.poNumber,
             date: z.date,
             subTotal: subTotal,
             paid: z.paid,
@@ -1837,8 +2391,8 @@ export class PrestigeService {
           }
           else if(res[key].scrap.toString().match(' x ')){
               
-              if(res[key].scrap.split(' x ')[0].replace('ft','') == 0 || 
-                res[key].scrap.split(' x ')[1].replace('ft','') == 0){
+              if(res[key].scrap.split(' x ')[0].replace('in','') == 0 || 
+                res[key].scrap.split(' x ')[1].replace('in','') == 0){
                   console.log(res[key].scrap)
                   console.log(key)
                   this.arrayToDeleteScrap.push(key)
@@ -1854,9 +2408,9 @@ export class PrestigeService {
         });
         if(this.arrayToDeleteScrap.length > 0){
           this.arrayToDeleteScrap.forEach( x => {
-            this.fb.delete('tblscrap', x ).then( () =>{
-              console.log(x)
-            })
+            // this.fb.delete('tblscrap', x ).then( () =>{
+            //   console.log(x)
+            // })
           })
         }
       }
@@ -1880,11 +2434,12 @@ export class PrestigeService {
 
     // })
   }
-
+  stockList_ = [];
   getStockMaterials(section, color, type){
     this.fb.retrieve('tblstock')
     .subscribe(res => {
       this.stockList = [];
+      this.stockList_ = [];
       res.forEach( x => {
         let materialkey = x.payload.toJSON().materialKey;
         let materialObj = {};
@@ -1896,6 +2451,35 @@ export class PrestigeService {
           materialObj['section'] = m[3].payload.toJSON();
           materialObj['supplier'] = 'FROM STOCK';
           materialObj['type'] = m[5].payload.toJSON();
+
+          this.fb.onceRetrieve(`tbltype/${m[5].payload.toJSON()}`).once('value', (rType) => {
+             
+            let typeRes = rType.toJSON();
+            console.log(typeRes['name'])
+            materialObj['type'] = typeRes['name'];
+            materialObj['typeKey'] = m[5].payload.toJSON();
+            console.log(materialObj)
+          });
+
+          
+          this.fb.onceRetrieve(`tblsection/${m[3].payload.toJSON()}`).once('value', (rSection) => {
+            let sectionRes = rSection.toJSON();
+            let sectionKey = x.section;
+            materialObj['section'] =sectionRes['name'];
+            materialObj['sectionKey'] = m[3].payload.toJSON();
+          });;
+
+          this.fb.onceRetrieve(`tblcolor/${m[0].payload.toJSON()}`).once('value', (rColor) => {
+               
+            let colorRes = rColor.toJSON();
+            if(colorRes != null){
+              
+              materialObj['color'] = colorRes['name'];
+              materialObj['colorKey'] = m[0].payload.toJSON();
+            }
+          });
+
+          
         })
 
         materialObj['isShow'] = true;
@@ -1915,6 +2499,7 @@ export class PrestigeService {
         
       });
       console.log(this.stockList)
+      this.stockList_ = this.stockList;
       let wew = this;
       setTimeout( function() {
         wew.sortMaterialsStock(section, color, type);
@@ -1946,20 +2531,24 @@ export class PrestigeService {
   }
 
   sortMaterialsStock(section, color, type){
-  
+    
+    console.log(section + 'SEction')
+    console.log(color+ 'COLOR')
+    console.log(type)
+
     this.stockList.forEach( m =>  {
    
-
-      if(type == m.type){
-        
+     if(type != null){
+      if(type.key == m.typeKey){
+        console.log(m)
         if(section != null && color == null){
-          m.isShow = m.section == section ? true : false;
+          m.isShow = m.sectionKey == section.key ? true : false;
         }
         else if(section == null && color != null){
-          m.isShow = m.color == color ? true : false;
+          m.isShow = m.colorKey == color.key ? true : false;
         }
         else if(section != null && color != null){
-          m.isShow = section == m.section && color == m.color ? true : false;
+          m.isShow = section.key == m.sectionKey && color.key == m.colorKey ? true : false;
         }
         else{
           m.isShow = true;
@@ -1970,6 +2559,7 @@ export class PrestigeService {
       else{
         m.isShow = false;
       }
+    }
       
     });
     console.log(this.stockList)
@@ -1991,7 +2581,8 @@ export class PrestigeService {
           materialName: data.materialName,
           color: data.color,
           scrap: element.payload.toJSON().scrap,
-          stockkey: data.stockKey
+          stockkey: data.stockKey,
+          scrapKey: element.payload.key
         });
         
       });
@@ -2163,10 +2754,33 @@ export class PrestigeService {
 
   addSupplier(data) {
     console.log(data)
+    data['discount'] = '.0';
     this.fb.add('tblsupplier', data)
     .then( () => {
       console.log('Supplier added');
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Supplier has been addedd.`)
+    });
+  }
+  
+
+  getAllSupplier(){
+    this.fb.retrieve('tblsupplier')
+    .subscribe( res => {
+      this.dropdownAllSupplier.arr = [];
+      res.forEach(element => {
+        let x = element.payload.toJSON();
+        x['key'] = element.payload.key;
+        this.dropdownAllSupplier.arr.unshift(x)
+      });
+
+      this.dropdownAllSupplier.arr.sort(function (a, b) {
+        if (a.name < b.name) {
+            return -1;
+        }
+        return 0;
+      });
+
+      console.log(this.dropdownAllSupplier)
     });
   }
 
@@ -2174,8 +2788,7 @@ export class PrestigeService {
     this.listOfSupplier = []; 
     this.fb.retrieve('tblsupplier')
     .subscribe( res => {
-     this.listOfSupplier = []; 
-     
+     this.listOfSupplier = [];
       res.forEach(element => {
         let x = element.payload.toJSON();
         let key = element.payload.key;
@@ -2201,6 +2814,7 @@ export class PrestigeService {
           this.listOfSupplier.unshift({
             name: x.name,
             types: types_,
+            discount: x.discount,
             key: key
           });
 
@@ -2216,7 +2830,8 @@ export class PrestigeService {
   editSupplier(data){
     
     this.fb.edit('tblsupplier', data.key, {
-      name: data.fields[0].value
+      name: data.fields[0].value,
+      discount: '.'+data.fields[1].value
     })
     .then( () => {
       console.log('successfully Updated')
@@ -2406,6 +3021,8 @@ export class PrestigeService {
       });
       
       console.log(this.supplierCheckBox)
+
+      this.dropdownSupplier.arr = this.supplierCheckBox;
     });
 
     this.fb.onceRetrieve('tblsection').once('value', (r) => {
@@ -2417,6 +3034,8 @@ export class PrestigeService {
          name: res[key].name,
          isCheck: false
        }) : '';
+
+       
       });
 
       this.sectionCheckBox.sort(function (a, b) {
@@ -2427,12 +3046,14 @@ export class PrestigeService {
       });
       
       console.log(this.sectionCheckBox)
+      this.dropdownSection.arr = this.sectionCheckBox;
     });
 
     this.fb.onceRetrieve('tblcolor').once('value', (r) => {
       let res = r.toJSON();
       this.colorCheckBox = [];
       Object.keys(res).map((key) => {
+        console.log(res[key])
        res[key].types.match(data.key) ?  this.colorCheckBox.push({
          key: key,
          name: res[key].name,
@@ -2448,29 +3069,15 @@ export class PrestigeService {
       });
       
       console.log(this.colorCheckBox)
+      this.dropdownColor.arr = this.colorCheckBox;
     });
   }
 
-  editMaterialKey(){
+  deleteScrap(data){
+    console.log(data)
 
-    this.fb.onceRetrieve(`tblmaterials`)
-    .once('value',( r )=> {
-      let res = r.toJSON();
-      Object.keys(res).map((key) => {
-        
-        console.log(res[key].color)
-        if(res[key].color == 'ANNEALED'){
-          // console.log(res[key].color)
-
-          // this.fb.edit('tblmaterials', key, {
-          //   color: ''
-          // })
-          // .then( () => {
-          //   console.log('successful updated')
-          // })
-
-        }
-      })
-    });
+    this.fb.delete('tblscrap', data.scrapKey)
+    .then(() => console.log('deleted'))
   }
+
 }

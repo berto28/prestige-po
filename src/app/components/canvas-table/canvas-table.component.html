@@ -1,8 +1,17 @@
 <div>
   <h2>List of Items 
-    <a class="btn waves-effect wave-light" (click)="onClickViewAll()">view all</a>
+    <!-- <a class="btn waves-effect wave-light" (click)="onClickViewAll()">view all</a> -->
     <span *ngIf="prestige.isCanvasExist">No item with that supplier, section and color</span>
   </h2>
+  <div class="row">
+    <div class="input-field col s6">
+      <input  type="text" class="validate" placeholder="Search by material name" [(ngModel)]="search" (keyup)="onKeyupSearch()">
+    </div>
+    <div class="col s6 searchMessageContainer" *ngIf="prestige.materialList.length == 0 && search != ''">
+      <p class="red-text">There's no "{{search}}" material name in the price list</p>
+    </div>
+  </div>
+  
   <div class="progress" *ngIf="prestige.materialList.length == 0 && prestige.isCanvasExist == false">
       <div class="indeterminate"></div>
   </div>
@@ -17,6 +26,8 @@
               <th>Color</th>
               <th>Material Name</th>
               <th>Price</th>
+              <th>Discount</th>
+              <th>SellingPrice</th>
               <th></th>
           </tr>
         </thead>
@@ -30,6 +41,8 @@
             <td>{{ m.color }}</td>
             <td>{{ m.materialName }}</td>
             <td>{{ m.price | currency:'&#x20B1;'}}{{m.type == 'Glass' ? '/SQFT' : ''}}</td>
+            <td>{{ m.discount.replace('.','') }}%</td>
+            <td>{{ m.sellingPrice | currency:'&#x20B1;' }}</td>
             <td>
               <a 
               class="btn yellow darken-2 left modal-trigger" href="#modalupdate"

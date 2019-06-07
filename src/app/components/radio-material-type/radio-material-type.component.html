@@ -1,13 +1,18 @@
 <div class="row">
     <div class="col s9">
-        <p>Type</p>
-      <div class="col s4" *ngFor="let c of prestige.listOfType; let i = index">
-        <p (click)="onClickRadioButton(c, $event, i)">
-          <label>
-            <input name="groupType" class="with-gap" [checked]="c.isCheck"  type="radio"/>
-            <span>{{ c.name }}</span>
-          </label>
-        </p>
+      <p>Type</p>
+      <div class="progress" *ngIf="prestige.listOfType.length ==0">
+        <div class="indeterminate"></div>
       </div>
+      <ng-container *ngIf="prestige.listOfType.length !=0">
+        <div class="col s4" *ngFor="let c of prestige.listOfType; let i = index">
+          <p (click)="onClickRadioButton(c, $event, i)">
+            <label>
+              <input name="groupType" class="with-gap" [checked]="c.isCheck"  type="radio"/>
+              <span>{{ c.name }}</span>
+            </label>
+          </p>
+        </div>
+      </ng-container>
     </div>
   </div>

@@ -6,22 +6,27 @@
     <div class="row">
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSupplier($event)" 
+        [dropdownData]="prestige.dropdownSupplier"></app-dropdown-color>
+        <!-- <app-dropdown-color (color)="onSelectSupplier($event)" 
         [dropdownData]="type == 'Aluminum' ? prestige.dropdownSupplier : 
-        type == 'Glass' ? prestige.dropdownSupplierGlass : prestige.dropdownSupplierAccessories"></app-dropdown-color>
+        type == 'Glass' ? prestige.dropdownSupplierGlass : prestige.dropdownSupplierAccessories"></app-dropdown-color> -->
       </div>
       <div class="col s6">
         <app-dropdown-color (color)="onSelectSection($event)" 
+        [dropdownData]="prestige.dropdownSection"></app-dropdown-color>
+        <!-- <app-dropdown-color (color)="onSelectSection($event)" 
         [dropdownData]="type == 'Aluminum' ? prestige.dropdownSection : 
-        type == 'Glass' ? prestige.dropdownSectionGlass : prestige.dropdownSectionAccesories"></app-dropdown-color>
+        type == 'Glass' ? prestige.dropdownSectionGlass : prestige.dropdownSectionAccesories"></app-dropdown-color> -->
       </div>
       <div class="col s6 offset-s6" *ngIf="type != 'Accessories'">
-          <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
+          <div class="col s4" *ngFor="let c of prestige.dropdownColor.arr; let i = index">  
+        <!-- <div class="col s4" *ngFor="let c of type == 'Aluminum' ?  prestige.dropdownColor.arr : 
                                                type == 'Glass' ? prestige.dropdownGlassType.arr : prestige.dropdownColor.arr; 
-                                               let i = index">
+                                               let i = index"> -->
             <p (click)="onClickRadioButton(c, $event, i)">
               <label>
                 <input name="group1" class="with-gap" [checked]="isRadioCheck[i]"  type="radio"/>
-                <span>{{ c }}</span>
+                <span>{{ c.name }}</span>
               </label>
             </p>
           </div>

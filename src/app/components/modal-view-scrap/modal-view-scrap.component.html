@@ -9,6 +9,7 @@
                     <th>Material Name</th>
                     <th>Color</th>
                     <th>Scrap</th>
+                    <th></th>
                   </tr>
                 </thead>
         
@@ -16,7 +17,13 @@
                   <tr *ngFor="let s of prestige.scrapList.list">
                     <td>{{ s.materialName }}</td>
                     <td>{{ s.color }}</td>
-                    <td>{{ s.scrap }}</td>
+                    <td>{{ s.scrap }} in</td>
+                    <td>
+                      <a 
+                      class="btn red left"
+                      (click)="onClickDeleteScrap(s)"
+                      > <i class="material-icons">delete</i></a>
+                    </td>
                   </tr>
                 </tbody>
               </table>

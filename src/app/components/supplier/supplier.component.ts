@@ -18,12 +18,13 @@ export class SupplierComponent implements OnInit {
 
   ngOnInit() {
     this.prestige.M.init();
-
+    this.prestige.getAllSupplier();
   }
 
   onSelectSupplier(supplier) {
     this.prestige.isShowProgressSupplier = true;
     this.supplier = supplier;
+    console.log(supplier);
     this.prestige.getPOUsingSupplier(supplier);
   }
 

@@ -25,6 +25,6 @@ export class DropdownColorComponent implements OnInit {
 
   onClickColor(color): void{
     this.color.emit(color);
-    this.dropdownData.text = color;
+    this.dropdownData.text = color.name;
   }
 }

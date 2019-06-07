@@ -58,4 +58,16 @@ export class ModalViewScrapComponent implements OnInit {
     this.glassScrap.h = null;
   }
 
+  onClickDeleteScrap(s){
+    
+    var toastHTML = `<span>
+      Are you sure you want to delete <b class="yellow-text">${s.materialName} scrap</b>?
+    </span><button id="${s.stockKey}" class="btn-flat toast-action" >Delete</button>`;
+    this.prestige.M.toast(toastHTML);
+    document.querySelector(`.toast #${s.stockKey}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      this.prestige.deleteScrap(s);
+    });
+  }
+
 }

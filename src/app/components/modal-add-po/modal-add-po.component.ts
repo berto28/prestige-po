@@ -15,9 +15,10 @@ export class ModalAddPoComponent implements OnInit {
   sectionPick: string = null;
   isRadioCheck: Array<any> = [false, false, false];
   switch: boolean = false;
-  type = 'Aluminum';
+  type = '';
   constructor(public prestige: PrestigeService) { 
     console.log(this.projectKey)
+    prestige.getSupplier();
     this.prestige.dropdownSection.text = 'choose a section';
     this.prestige.dropdownSupplier.text = 'choose a supplier';
     this.prestige.stockList = [];
@@ -31,7 +32,7 @@ export class ModalAddPoComponent implements OnInit {
   onSelectSupplier(supplier){
     console.log(supplier)
     this.supplierPick = supplier;
-    
+
     this.getMaterials();
     // this.supplierPick != null ? 
     // this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
@@ -191,12 +192,16 @@ export class ModalAddPoComponent implements OnInit {
     this.supplierPick = null;
     this.colorPick = null;
     this.sectionPick = null;
-    console.log('asd')
+    console.log(this.type)
     this.prestige.dropdownSupplierGlass['text'] = 'Choose Supplier';
     this.prestige.dropdownSectionGlass['text'] = 'Choose Section';
     this.prestige.dropdownSection['text'] = 'Choose Section';
     this.prestige.dropdownSupplier['text'] = 'Choose Supplier';
     this.prestige.projects_materialList = [];
+    for(let c1 = 0; c1 < 3; c1++){
+      this.isRadioCheck[c1] = false;
+    }
+    this.prestige.getSupplierCheckBox(type);
     this.switch ? this.prestige.sortMaterialsStock(this.sectionPick, this.colorPick, this.type) : 
     this.prestige.sortMaterials(this.sectionPick, this.colorPick, this.type);
    

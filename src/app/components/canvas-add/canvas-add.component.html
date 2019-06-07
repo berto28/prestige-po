@@ -9,7 +9,7 @@
         <div class="indeterminate"></div>
       </div>
       <div class="col s3" *ngFor="let s of prestige.supplierCheckBox">
-        <p (click)="onClickCheckBox(s, $event)">
+        <p (click)="onClickCheckBox(s, $event, 'supplier')">
           <label>
             <input type="checkbox"  [(ngModel)]="s.isCheck"/>
             <span>{{ s.name }}</span>
@@ -25,7 +25,7 @@
         <div class="indeterminate"></div>
       </div>
       <div class="col s3" *ngFor="let s of prestige.sectionCheckBox">
-        <p (click)="onClickCheckBox(s, $event)">
+        <p (click)="onClickCheckBox(s, $event, 'section')">
           <label>
             <input type="checkbox"  [(ngModel)]="s.isCheck"/>
             <span>{{ s.name }}</span>
@@ -41,7 +41,7 @@
         <div class="indeterminate"></div>
       </div>
       <div class="col s3" *ngFor="let s of prestige.colorCheckBox">
-        <p (click)="onClickCheckBox(s, $event)">
+        <p (click)="onClickCheckBox(s, $event, 'color')">
           <label>
             <input type="checkbox"  [(ngModel)]="s.isCheck"/>
             <span>{{ s.name }}</span>

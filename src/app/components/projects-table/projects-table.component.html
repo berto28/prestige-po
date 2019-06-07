@@ -14,13 +14,27 @@
               <app-po-list [poList]="p.po"></app-po-list>
             </div>
             <div class="col s1">
-              <a class="btn-floating btn-small waves-effect waves-light yellow darken-2 tooltipped modal-trigger"
-              href="#modal1"
-              data-position="left" data-tooltip="Add PO"
-              (click)="setProjectKey(p.key)"
-              >
-                <i class="material-icons">add</i>
-              </a>
+              <div class="row">
+                <a class="btn-floating btn-small waves-effect waves-light teal tooltipped modal-trigger"
+                href="#modal1"
+                data-position="left" data-tooltip="Add PO"
+                (click)="setProjectKey(p.key)"
+                >
+                  <i class="material-icons">add</i>
+                </a>
+              </div>
+              <div class="row">
+                <a class="btn-floating btn-small waves-effect waves-light yellow darken-2 tooltipped modal-trigger"
+                href="#modalupdate"
+                data-position="left" data-tooltip="Update Project Name"
+                (click)="editProject(p)"><i class="material-icons">edit</i></a>
+              </div>
+              <div class="row" *ngIf="p.po.length == 0">
+                  <a class="btn-floating btn-small waves-effect waves-light red tooltipped "
+                  data-position="left" data-tooltip="Delete Project"
+                  (click)="deleteProject(p)"><i class="material-icons">delete</i></a>
+              </div>
+              
             </div>
           </div>
           <div class="col s12">
@@ -43,3 +57,8 @@
 <app-print-po [printPO]="printPO"></app-print-po>
 
 <app-modal-cutting-list [cuttingList]="prestige.cuttingList"></app-modal-cutting-list>
+
+<app-modal-update 
+[editData]="prestige.project_modalUpdateFields"
+(updatedMaterial)="onClickUpdateModal($event)"
+></app-modal-update>

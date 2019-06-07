@@ -49,4 +49,25 @@ export class ProjectsTableComponent implements OnInit {
     
     
   }
+
+  editProject(project){
+    console.log(project)
+    this.prestige.project_modalUpdateFields.key = project.key;
+    this.prestige.project_modalUpdateFields.fields[0].value = project.name;
+  }
+
+  onClickUpdateModal(project){
+    this.prestige.editProjectName(project);
+  }
+
+  deleteProject(project){
+    var toastHTML = `<span>
+      Are you sure you want to delete <b class="yellow-text">${project.name}</b>?
+    </span><button id="${project.key}" class="btn-flat toast-action" >Delete</button>`;
+    this.prestige.M.toast(toastHTML);
+    document.querySelector(`.toast #${project.key}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      this.prestige.deleteProject(project);
+    });
+  }
 }

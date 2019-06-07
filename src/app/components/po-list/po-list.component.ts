@@ -106,5 +106,17 @@ export class PoListComponent implements OnInit {
     });
     this.prestige.cuttingList = cuttingList;
   }
+  
+  cancelPO(po){
+    var toastHTML = `<span>
+      Are you sure you want to cancel <b class="yellow-text">PO #${po.poNumber}</b>?
+    </span><button id="${po.key}" class="btn-flat toast-action" >Cancel</button>`;
+    this.prestige.M.toast(toastHTML);
+    document.querySelector(`.toast #${po.key}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      
+      this.prestige.cancelPO(po);
+    });
+  }
 
 }

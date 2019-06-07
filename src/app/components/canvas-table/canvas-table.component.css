@@ -10,3 +10,7 @@ h2 span {
 a {
     cursor: pointer !important;
 }
+
+.searchMessageContainer {
+    padding-top: 16px;
+}

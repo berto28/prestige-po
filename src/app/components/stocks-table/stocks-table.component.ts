@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PrestigeService } from '../..//services/prestige.service';
+import { CommentStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-stocks-table',
@@ -10,6 +11,8 @@ export class StocksTableComponent implements OnInit {
 
   startFrom: number = 0;
   toEnd: number = 20;
+
+  search: string = '';
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
@@ -62,5 +65,9 @@ export class StocksTableComponent implements OnInit {
       this.prestige.M.toastDismiss();
       this.prestige.deleteStock(material);
     });
+  }
+
+  onKeyupSearch(){
+    this.prestige.searchStock(this.search.toLowerCase());
   }
 }

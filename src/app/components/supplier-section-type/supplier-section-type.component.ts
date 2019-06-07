@@ -30,7 +30,7 @@ export class SupplierSectionTypeComponent implements OnInit {
    console.log(updateType)
    updateType.title.toLowerCase().match('supplier') ? this.prestige.editSupplier(updateType) :  
    updateType.title.toLowerCase().match('section') ? this.prestige.editSection(updateType) : 
-   updateType.title.toLowerCase().match('section') ? this.prestige.editType(updateType): 
+   updateType.title.toLowerCase().match('type') ? this.prestige.editType(updateType): 
                                                     this.prestige.editColor(updateType);
   }
 
@@ -128,6 +128,12 @@ export class SupplierSectionTypeComponent implements OnInit {
     this.prestige.type_modalUpdateFields.key = supplier.key;
     this.prestige.type_modalUpdateFields.fields[0].label = 'Supplier Name';
     this.prestige.type_modalUpdateFields.fields[0].value = supplier.name;
+    this.prestige.type_modalUpdateFields.fields[1] ={
+      target: 'discountName',
+      label: 'Discount',
+      type: 'text',
+      value: supplier.discount.replace('.','')
+    };
   }
 
   onClickAddSection(){
