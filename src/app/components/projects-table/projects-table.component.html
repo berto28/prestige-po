@@ -23,18 +23,19 @@
                   <i class="material-icons">add</i>
                 </a>
               </div>
-              <div class="row">
+              <!-- <div class="row">
                 <a class="btn-floating btn-small waves-effect waves-light yellow darken-2 tooltipped modal-trigger"
                 href="#modalupdate"
                 data-position="left" data-tooltip="Update Project Name"
                 (click)="editProject(p)"><i class="material-icons">edit</i></a>
               </div>
-              <div class="row" *ngIf="p.po.length == 0">
-                  <a class="btn-floating btn-small waves-effect waves-light red tooltipped "
-                  data-position="left" data-tooltip="Delete Project"
-                  (click)="deleteProject(p)"><i class="material-icons">delete</i></a>
-              </div>
-              
+              <ng-container *ngIf="p.po !=undefined">
+                <div class="row" *ngIf="p.po.length == 0">
+                    <a class="btn-floating btn-small waves-effect waves-light red tooltipped "
+                    data-position="left" data-tooltip="Delete Project"
+                    (click)="deleteProject(p)"><i class="material-icons">delete</i></a>
+                </div>
+            </ng-container> -->
             </div>
           </div>
           <div class="col s12">

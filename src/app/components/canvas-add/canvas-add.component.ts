@@ -157,7 +157,7 @@ export class CanvasAddComponent implements OnInit {
       materials: this.prestige.materials,
       type: this.typeKey
     };
-
+    // console.log(obj);
     this.prestige.addCanvas(obj);
   }
 
@@ -166,7 +166,8 @@ export class CanvasAddComponent implements OnInit {
     this.prestige.materials.push(
       {
         name: '',
-        price: ''
+        price: '',
+        discount: undefined
       }
     );
   }
@@ -175,11 +176,34 @@ export class CanvasAddComponent implements OnInit {
     this.prestige.materials.splice(index,1);
   }
 
+  ngOnDestroy(){
+    this.prestige.supplierCheckBox =[];
+    this.prestige.sectionCheckBox =[];
+    this.prestige.colorCheckBox =[];
+  }
+
   onClickRadioButton(type){
     this.type = type.name;
     this.typeKey = type.key;
     this.prestige.getSupplierCheckBox(type);
     this.prestige.getCanvasUsingType(type);
+  }
+
+  onClickUpdateDiscounts(data){
+    let arr = [];
+
+    data.forEach( x => {
+      x.isCheck == true ? arr.unshift(x) : '';
+    });
+    
+    arr.forEach(x => {
+      x.colors.forEach( y => {
+        y['discount']+''.match('.') ? '' : y['discount'] = '.'+y['discount'];
+      });
+    });
+
+    // console.log(arr)
+    this.prestige.updateDiscount(arr)
   }
 
 }

@@ -23,6 +23,12 @@ export class MaterializeService {
     }, 0)
   }
 
+  inputFields(): void{
+    setTimeout( function() {
+      M.updateTextFields();
+    }, 0)
+  }
+
   toast(text): void{
     M.toast({html: text})
   }

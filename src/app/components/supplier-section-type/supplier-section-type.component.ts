@@ -128,12 +128,6 @@ export class SupplierSectionTypeComponent implements OnInit {
     this.prestige.type_modalUpdateFields.key = supplier.key;
     this.prestige.type_modalUpdateFields.fields[0].label = 'Supplier Name';
     this.prestige.type_modalUpdateFields.fields[0].value = supplier.name;
-    this.prestige.type_modalUpdateFields.fields[1] ={
-      target: 'discountName',
-      label: 'Discount',
-      type: 'text',
-      value: supplier.discount.replace('.','')
-    };
   }
 
   onClickAddSection(){

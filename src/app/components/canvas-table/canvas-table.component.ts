@@ -35,9 +35,18 @@ export class CanvasTableComponent implements OnInit {
   }
 
   onClickEditMaterial(material){
+    console.log(material)
     this.prestige.maaterial_modalUpdateFields['key'] = material.key;
     this.prestige.maaterial_modalUpdateFields['fields'][0]['value'] = material.materialName;
     this.prestige.maaterial_modalUpdateFields['fields'][1]['value'] = material.price;
+    if(material.type == 'Accessories'){
+      this.prestige.maaterial_modalUpdateFields['fields'][2] ={
+        target: 'discountUpdate',
+        label: 'Discount',
+        type: 'number',
+        value: material.discount.replace('.','')
+      };
+    }
   }
 
   onClickUpdateModal(updateMaterial){
