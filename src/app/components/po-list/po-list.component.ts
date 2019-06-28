@@ -7,7 +7,7 @@ import { PrestigeService } from '../../services/prestige.service';
 })
 export class PoListComponent implements OnInit {
   @Input() poList;
-
+  @Input() laborList;
   poClass = {
     paid: 'teal disabled',
     unpaid: 'red pulse'
@@ -22,10 +22,10 @@ export class PoListComponent implements OnInit {
 
   }
 
-  onClickPayPO(key){
+  onClickPayPO(key, number){
 
     var toastHTML = `<span>
-    Pay PO#<b class="yellow-text">${key}</b>?
+    Pay PO#<b class="yellow-text">${number}</b>?
     </span><a id="check${key}" class="btn-flat toast-action modal-trigger" href="#modalPay">Check</a>
     <a id="cash${key}" class="btn-flat toast-action modal-trigger" href="#modalPay">Cash</a>`;
     this.prestige.M.toast(toastHTML);
@@ -45,12 +45,58 @@ export class PoListComponent implements OnInit {
       // this.prestige.payPO(key)
     });
 
+    
+
     document.querySelector(`.toast #cash${key}`).addEventListener('click', (event)=> {
       this.prestige.M.toastDismiss();
       this.prestige.pay = {
         projectKey: key,
         paidBy: 'cash',
         date: null,
+        field: {
+          id: 'discount',
+          label: 'Discount',
+          value: null
+        }
+      };
+      
+      // this.prestige.payPO(key)
+    });
+    this.prestige.M.datePicker();
+  }
+
+  onClickPayLabor(key,number){
+    var toastHTML = `<span>
+    Pay PO#<b class="yellow-text">${number}lb</b>?
+    </span><a id="check${key}" class="btn-flat toast-action modal-trigger" href="#modalPay">Check</a>
+    <a id="cash${key}" class="btn-flat toast-action modal-trigger" href="#modalPay">Cash</a>`;
+    this.prestige.M.toast(toastHTML);
+    
+    document.querySelector(`.toast #check${key}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      this.prestige.pay = {
+        projectKey: key,
+        paidBy: 'check',
+        date: null,
+        labor: true,
+        field: {
+          id: 'checkNumber',
+          label: 'Check Number',
+          value: null
+        }
+      };
+      // this.prestige.payPO(key)
+    });
+
+    
+
+    document.querySelector(`.toast #cash${key}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      this.prestige.pay = {
+        projectKey: key,
+        paidBy: 'cash',
+        date: null,
+        labor: true,
         field: {
           id: 'discount',
           label: 'Discount',
@@ -117,6 +163,26 @@ export class PoListComponent implements OnInit {
       
       this.prestige.cancelPO(po);
     });
+  }
+
+  cancelLabor(labor){
+    console.log(labor)
+    var toastHTML = `<span>
+      Are you sure you want to cancel <b class="yellow-text">PO #${labor.poNumber}</b>?
+    </span><button id="${labor.key}" class="btn-flat toast-action" >Cancel</button>`;
+    this.prestige.M.toast(toastHTML);
+    document.querySelector(`.toast #${labor.key}`).addEventListener('click', (event)=> {
+      this.prestige.M.toastDismiss();
+      
+      this.prestige.cancelLabor(labor);
+    });
+  }
+
+  onClickLabor(po){
+    console.log(po)
+    this.prestige.poLabor = po;
+    this.prestige.listOfSupplierLabor = [];
+    this.prestige.selectedLaborType = 'TYPE OF LABOR';
   }
 
 }

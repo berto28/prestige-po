@@ -1,0 +1,44 @@
+<div id="modalLabor" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Labor</h4>
+    <div class="row">
+      <div class="col s3">
+          <a class='dropdown-trigger btn' data-target='dropdownLabor'>{{prestige.selectedLaborType}}</a>
+          <ul id='dropdownLabor' class='dropdown-content'>
+            <li *ngFor="let l of labor" (click)="onClickType(l.type)"><a>{{l.type}}</a></li>
+          </ul>
+      </div>
+    </div>
+    <div class="row">
+      <table class="centered highlight">
+        <thead>
+          <tr>
+              <th>Supplier</th>
+              <th>Name</th>
+              <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="prestige.listOfSupplierLabor.length != 0">
+            <tr *ngFor="let s of prestige.listOfSupplierLabor">
+              <td>{{s.labor.supplier}}</td>
+              <td>
+                <p (click)="onClickCheckBox($event, s)">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="s.labor.isCheck"/>
+                    <span>{{s.labor.item}}</span>
+                  </label>
+                </p>
+              </td>
+              <td>{{s.labor.price | currency:'&#x20B1;'}}</td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+    <a class="modal-close waves-effect waves-green btn-flat" (click)="onClickProceed()">Proceed</a>
+  </div>
+</div>

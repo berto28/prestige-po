@@ -10,7 +10,7 @@ export class PrestigeService {
 
   url: string = 'Projects';
   addingPOLoader = false;
-
+  poLabor;
   poNumber: string = '';
   //////////////////////////////// canvas
   dropdownColor: any = {
@@ -192,7 +192,7 @@ export class PrestigeService {
     title: 'Delete',
     key: ''
   }
-
+  listOfSupplier = [];
   materials: Array<object> = [];
   materialList: Array<object> = [];
   materialList_: Array<object> = [];
@@ -823,7 +823,7 @@ export class PrestigeService {
       this.project_isAdding = false;
     })
   }
-
+  laborArray: any;
   getProjects(){
     this.fb.retrieve('tblprojects')
     .subscribe( (res) => {
@@ -869,6 +869,7 @@ export class PrestigeService {
             console.log(z)
             let poArr = [];
             let subTotal = 0;
+            let laborArray = [];
 
             Object.keys(z.po).map((key) => {
               console.log(z.po[key].typeKey)
@@ -911,7 +912,7 @@ export class PrestigeService {
                   
                   let inches = this.fractionToInches(''+z.po[key].qty);
                   
-                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   console.log(inches)
                   z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
                   * z.po[key].numberOfSet;
@@ -921,8 +922,8 @@ export class PrestigeService {
                 }
                 else if(z.po[key].type.toLowerCase() == 'glass'){
                   console.log('PUMASOK SA TYPE GLASS')
-                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                   let sqft = ((xWidth * xHeight) / 144);
                   z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -935,8 +936,8 @@ export class PrestigeService {
               }
               else{
                if( z.po[key]['type'] == "Glass"){
-                let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                 // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                 let sqft = ((xWidth * xHeight) / 144);
                 z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -962,9 +963,76 @@ export class PrestigeService {
             total += subTotal;
 
             
+            this.fb.retrieveWithCondition('tbllabor', 'poKey', element.payload.key)
+            .subscribe( lab => {
+              console.log('wew')
+              
+              
+              
+              lab.forEach(labor => {
+                let l = labor.payload.toJSON();
+                let laborArr = [];
+                let subTotal = 0;
+                let laborSubtotal = 0;
+                Object.keys(l.labor).map((key) => {
+                  console.log(l.labor[key])
+                    subTotal = 0;
+                  if(l.labor[key].pricing == 'sqft'){
+                    subTotal = (l.labor[key].width * l.labor[key].height) / 144;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                  }
+                  else{
+                    subTotal = ((l.labor[key].width * 2) + (l.labor[key].height * 2)) / 12;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                  }
 
+                 
+                  
+                  let obj = {
+                    laborType: l.labor[key].laborType,
+                    laborSupplier: l.labor[key].laborSupplier,
+                    item: l.labor[key].materialName,
+                    price: l.labor[key].price,
+                    width: l.labor[key].width,
+                    height: l.labor[key].height,
+                    numberOfset: l.labor[key].qty,
+                    total: subTotal
+                  }
+                  laborSubtotal+=subTotal;
+                  laborArr.push(obj);
+                 
+                 
+                });
+
+                if(laborArr.length !=0){
+                  if(l.paid.paidBy == "cash"){
+                    laborSubtotal -= laborSubtotal * l.paid.discount; 
+                  }
+                  laborArray.push({
+                    labor: laborArr,
+                    laborKey: labor.payload.key,
+                    poNumber: l.laborNumber,
+                    paid: l.paid,
+                    date: l.date,
+                    subTotal: laborSubtotal,
+                    projectName: 'LABOR'
+                  });
+                  
+                  total+=laborSubtotal;
+                }
+
+              });
+              
+              x['total'] = total;
+              console.log(laborArray)
+             
+            });
+            
             arr.unshift({
               po: poArr,
+              labor: laborArray,
               poKey: element.key,
               poNumber: z.poNumber,
               date: z.date,
@@ -973,11 +1041,13 @@ export class PrestigeService {
               projectName: x.name,
               isShow: true
             });
-          
+           
+            
           });
           
           x['po'] = arr;
-          x['total'] = total;
+          x['labor']= [];
+          
         })
       })
 
@@ -993,9 +1063,10 @@ export class PrestigeService {
     return inches == null || inches == 'undefined' || inches == undefined ? 0: parseFloat(inches);
   }
 
-  roundOff(inches, type, supplier){
+  roundOff(inches, type, supplier, section, color){
 
-   
+   console.log(section)
+   console.log(color)
 
     if(type == 'aluminum'){
       let x = 12;
@@ -1011,7 +1082,8 @@ export class PrestigeService {
       return x;
     }
     else{
-      let x = 6;
+      let x = 0;
+      console.log(`${supplier} ${color} ${section}`)
       while(true){
   
         if(inches <= x){
@@ -1019,24 +1091,75 @@ export class PrestigeService {
           console.log(x);
           break;
         }
-
+        
         if(supplier == 'TRANS'){
-          x+=6;
-          console.log(supplier)
-          console.log(x)
+          console.log('trans')
+          if(color == 'TEMPERED'){
+            
+            if(section == 'CLEAR' || section == 'BROWN'){
+              console.log(`${supplier} ${color} ${section} first formula x6`)
+                x+=6;
+                console.log(supplier)
+                console.log(x)
+    
+            }
+            else{
+              console.log(`${supplier} ${color} ${section} first formula x12`)
+              x+=12;
+              console.log(supplier)
+              console.log(x)
+            }
+          }
+          else{
+            x+=12;
+            console.log(supplier)
+            console.log(x)
+          }
+          
         }
+       
         else{
-         if(x >= 48){
-           x+=12;
-           console.log(supplier)
-           console.log(x);
-         }
-         else{
-           x+=6;
-           console.log(supplier)
-           console.log(x);
-         }
+          console.log('asd')
+          if(color == 'TEMPERED'){
+            console.log(`${supplier} ${color} ${section} 2nd formula`)
+            if(x >= 48){
+              x+=12;
+              console.log(supplier)
+              console.log(x);
+            }
+            else{
+              x+=6;
+              console.log(supplier)
+              console.log(x);
+            }
+          }
+          else{
+            x+=12;
+            console.log(supplier)
+            console.log(x);
+          }
+          // if(supplier == 'TRANS'){
+          //   x+=6;
+          //   console.log(supplier)
+          //   console.log(x)
+          // }
+          // else{
+          // //  if(x >= 48){
+          //    x+=12;
+          //    console.log(supplier)
+          //    console.log(x);
+          // //  }
+          // //  else{
+          // //    x+=6;
+          // //    console.log(supplier)
+          // //    console.log(x);
+          // //  }
+          // }
+          console.log('2nd Forumula')
+          
         }
+
+        
         
       }
       return x;
@@ -1893,17 +2016,37 @@ export class PrestigeService {
         this.M.toast('CHECK NUMBER is required');
       }
       else{
-        this.fb.edit('tblpo', data.projectKey, {
-          paid:{
-            isPaid: true,
-            paidBy: data.paidBy,
-            date: data.date,
-            check: data.field.value
-          }
-        })
-        .then( () => {
-          console.log('success');
-        });
+
+        if(data.labor == true){
+          console.log('labor')
+          this.fb.edit('tbllabor', data.projectKey, {
+            paid:{
+              isPaid: true,
+              paidBy: data.paidBy,
+              date: data.date,
+              check: data.field.value
+            }
+          })
+          .then( () => {
+            this.getProjects();
+            this.getPOUsingSupplier(this.getpoUsingSupplierName);
+            this.M.toast('Labor Paid, Refreshing')
+          });
+        }
+        else{
+          this.fb.edit('tblpo', data.projectKey, {
+            paid:{
+              isPaid: true,
+              paidBy: data.paidBy,
+              date: data.date,
+              check: data.field.value
+            }
+          })
+          .then( () => {
+            console.log('success');
+          });
+        }
+       
       } 
     }
     else{
@@ -1911,17 +2054,36 @@ export class PrestigeService {
         this.M.toast('DATE and DISCOUNT is required');
       }
       else{
-        this.fb.edit('tblpo', data.projectKey, {
-          paid:{
-            isPaid: true,
-            paidBy: data.paidBy,
-            date: data.date,
-            discount: '.'+data.field.value
-          }
-        })
-        .then( () => {
-          console.log('success');
-        });
+
+        if(data.labor == true){
+          console.log('labor')
+          this.fb.edit('tbllabor', data.projectKey, {
+            paid:{
+              isPaid: true,
+              paidBy: data.paidBy,
+              date: data.date,
+              discount: '.'+data.field.value
+            }
+          })
+          .then( () => {
+            this.getProjects();
+            this.getPOUsingSupplier(this.getpoUsingSupplierName);
+            this.M.toast('Labor Paid, Refreshing')
+          });
+        }
+        else{
+          this.fb.edit('tblpo', data.projectKey, {
+            paid:{
+              isPaid: true,
+              paidBy: data.paidBy,
+              date: data.date,
+              discount: '.'+data.field.value
+            }
+          })
+          .then( () => {
+            console.log('success');
+          });
+        }
       }
     }
     // console.log(key)
@@ -1953,9 +2115,31 @@ export class PrestigeService {
     console.log(data)
     let toDeleteArr = [];
 
-    this.fb.delete('tblpo', data.poKey).then(() => {
-      this.M.toast(`PO #${data.poNumber} is been canceled.`);
-    })
+    this.fb.retrieveOnce('tbllabor', 'poKey', data.poKey).once('value', r => {
+      let res = r.toJSON();
+      let laborKey;
+
+      if(res){
+        Object.keys(res).map((key) => {
+          laborKey = key;
+        });
+      }
+      
+      this.fb.delete('tblpo', data.poKey).then(() => {
+        
+        if(res){
+          this.fb.delete('tbllabor', laborKey).then(() => {
+            this.M.toast(`PO #${data.poNumber} is been canceled.`);
+          });
+        }else{
+          this.M.toast(`PO #${data.poNumber} is been canceled.`);
+        }
+       
+
+      });
+      console.log(laborKey)
+    });
+
 
     // if(data.po[0].supplier == 'FROM STOCK'){
     //   data.po.forEach(x => {
@@ -1970,11 +2154,44 @@ export class PrestigeService {
     // }
    
   }
+
+  cancelLabor(data){
+    console.log(data)
+    this.fb.delete('tbllabor', data.laborKey).then(() => {
+      this.M.toast(`PO #${data.poNumber}lb is been canceled. <br> Refreshing`);
+      this.getProjects();
+      this.getPOUsingSupplier(this.getpoUsingSupplierName);
+    });
+  }
+
+  addLabor(data){
+    console.log(data)
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    let yyyy = today.getFullYear();
+
+    let date = mm + '/' + dd + '/' + yyyy;
+    this.fb.add('tbllabor', {
+      labor: data,
+      poKey: data[0].poKey,
+      paid: false,
+      date: date,
+      laborNumber: data[0].poNumber+'_lb_'+data[0].laborType
+    })
+    .then( () => {
+      this.M.toast(`Labor has been added in PO# ${data[0].poNumber}, Refreshing`)
+      this.getProjects();
+      this.getPOUsingSupplier(this.getpoUsingSupplierName);
+    })
+  }
   // PROJECT
 
 
+  getpoUsingSupplierName = '';
   // SUPPLIER
   getPOUsingSupplier(supplier){
+    this.getpoUsingSupplierName = supplier;
     this.fb.retrieveWithCondition('tblpo', 'supplierKey', supplier.key)
     .subscribe( res => {
       this.poList = [];
@@ -2027,7 +2244,7 @@ export class PrestigeService {
             if(z.po[key].type.toLowerCase() == 'aluminum'){
               let inches = this.fractionToInches(''+z.po[key].qty);
                   
-              inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+              inches = this.roundOff(inches, 'aluminum', z.po[key].supplier, z.po[key].section, z.po[key].color);
               console.log(inches)
               z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
               * z.po[key].numberOfSet;
@@ -2037,8 +2254,8 @@ export class PrestigeService {
               }
               else if(z.po[key].type.toLowerCase() == 'glass'){
                 console.log('PUMASOK SA TYPE GLASS')
-                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                   let sqft = ((xWidth * xHeight) / 144);
                   z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2051,8 +2268,8 @@ export class PrestigeService {
           }
           else{
             if( z.po[key]['type'] == "Glass"){
-              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                 // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                 let sqft = ((xWidth * xHeight) / 144);
                 z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2073,30 +2290,105 @@ export class PrestigeService {
 
         balance+= z.paid ? 0 :  subTotal;
         total += subTotal;
+        let laborArray = [];
+        this.fb.retrieveWithCondition('tbllabor', 'poKey', element.payload.key)
+            .subscribe( lab => {
+              console.log('wew')
+              
+              
+              
+              lab.forEach(labor => {
+                let l = labor.payload.toJSON();
+                let laborArr = [];
+                let laborSubtotal = 0;
+                Object.keys(l.labor).map((key) => {
+                  console.log(l.labor[key])
+                  let subTotal = 0;
+                  if(l.labor[key].pricing == 'sqft'){
+                    subTotal = (l.labor[key].width * l.labor[key].height) / 144;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                    laborSubtotal+=subTotal;
+                  }
+                  else{
+                    
+                    subTotal = ((l.labor[key].width * 2) + (l.labor[key].height * 2)) / 12;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                    laborSubtotal+=subTotal;
+                  }
 
-        this.fb.retrieve(`tblprojects/${z.projectKey}`)
-        .subscribe( project => {
+                  
+                  let obj = {
+                    laborType: l.labor[key].laborType,
+                    laborSupplier: l.labor[key].laborSupplier,
+                    item: l.labor[key].materialName,
+                    price: l.labor[key].price,
+                    width: l.labor[key].width,
+                    height: l.labor[key].height,
+                    numberOfset: l.labor[key].qty,
+                    total: subTotal
+                  }
+                  
+                  laborArr.push(obj);
+                 
+                 
+                });
+                console.log(laborArr)
+                if(laborArr.length !=0){
+                  if(l.paid.paidBy == "cash"){
+                    laborSubtotal -= laborSubtotal * l.paid.discount; 
+                  }
+                  if(l.paid == false){
+                    balance+=laborSubtotal;
+                  }
+                  console.log(laborSubtotal)
+                  laborArray.push({
+                    labor: laborArr,
+                    laborKey: labor.payload.key,
+                    poNumber: l.laborNumber,
+                    paid: l.paid,
+                    date: l.date,
+                    subTotal: laborSubtotal,
+                    projectName: 'LABOR'
+                  });
+                  
+                  // subTotal+=laborSubtotal;
+                  total+=laborSubtotal;
+                }
 
-          this.poList.unshift({
-            po: poArr,
-            poKey: element.key,
-            poNumber: z.poNumber,
-            date: z.date,
-            subTotal: subTotal,
-            paid: z.paid,
-            projectName: project[0].payload.toJSON(),
-            isShow: true
-          });
-          
-        })
+              });
+              
+             
+              console.log(laborArray)
+             
+              this.fb.retrieve(`tblprojects/${z.projectKey}`)
+              .subscribe( project => {
+      
+                this.poList.unshift({
+                  po: poArr,
+                  labor: laborArray,
+                  poKey: element.key,
+                  poNumber: z.poNumber,
+                  date: z.date,
+                  subTotal: subTotal,
+                  paid: z.paid,
+                  projectName: project[0].payload.toJSON(),
+                  isShow: true
+                });
+                console.log(this.poList)
+              })
 
-        
+              this.poList['total'] = total;
+              this.poList['balance'] = balance;
+              this.supplierTotalPurchase = total;
+              
+            });
 
       });
       this.isShowProgressSupplier = false;
-      this.supplierTotalPurchase = total;
-      this.poList['total'] = total;
-      this.poList['balance'] = balance;
+     
+      
       console.log(this.poList);
 
     })
@@ -2123,7 +2415,7 @@ export class PrestigeService {
             if(z.po[key].type.toLowerCase() == 'aluminum'){
               let inches = this.fractionToInches(''+z.po[key].qty);
                   
-                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   console.log(inches)
                   z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
                   * z.po[key].numberOfSet;
@@ -2133,8 +2425,8 @@ export class PrestigeService {
             }
             else if(z.po[key].type.toLowerCase() == 'glass'){
               console.log('PUMASOK SA TYPE GLASS')
-                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                   let sqft = ((xWidth * xHeight) / 144);
                   z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2148,8 +2440,8 @@ export class PrestigeService {
           else{
             if( z.po[key]['type'] == "Glass"){
               console.log(z.po[key]['width'])
-              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                 // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                 let sqft = ((xWidth * xHeight) / 144);
                 z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2172,6 +2464,81 @@ export class PrestigeService {
         balance+= z.paid ? 0 :  subTotal;
         total += subTotal;
         console.log(z)
+
+        let laborArray = [];
+        this.fb.retrieveWithCondition('tbllabor', 'poKey', element.payload.key)
+            .subscribe( lab => {
+              console.log('wew')
+              
+              
+              
+              lab.forEach(labor => {
+                let l = labor.payload.toJSON();
+                let laborArr = [];
+                let laborSubtotal = 0;
+                Object.keys(l.labor).map((key) => {
+                  console.log(l.labor[key])
+                  let subTotal = 0;
+                  if(l.labor[key].pricing == 'sqft'){
+                    subTotal = (l.labor[key].width * l.labor[key].height) / 144;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                  }
+                  else{
+                    subTotal = ((l.labor[key].width * 2) + (l.labor[key].height * 2)) / 12;
+                    subTotal*=l.labor[key].price;
+                    subTotal*=l.labor[key].qty;
+                  }
+
+                  laborSubtotal+=subTotal;
+                  
+                  let obj = {
+                    laborType: l.labor[key].laborType,
+                    laborSupplier: l.labor[key].laborSupplier,
+                    item: l.labor[key].materialName,
+                    price: l.labor[key].price,
+                    width: l.labor[key].width,
+                    height: l.labor[key].height,
+                    numberOfset: l.labor[key].qty,
+                    total: subTotal
+                  }
+                  
+                  laborArr.push(obj);
+                 
+                 
+                });
+                console.log(laborArr)
+                if(laborArr.length !=0){
+                  if(l.paid.paidBy == "cash"){
+                    laborSubtotal -= laborSubtotal * l.paid.discount; 
+                  }
+                  if(l.paid == false){
+                    balance+=laborSubtotal;
+                  }
+
+                  laborArray.push({
+                    labor: laborArr,
+                    laborKey: labor.payload.key,
+                    poNumber: l.laborNumber,
+                    paid: l.paid,
+                    date: l.date,
+                    subTotal: laborSubtotal,
+                    projectName: 'LABOR'
+                  });
+                  
+                  subTotal+=laborSubtotal;
+                  
+                }
+                total+=laborSubtotal;
+                console.log(total)
+              });
+              
+             
+              console.log(laborArray)
+              this.purchases_poList['total'] = total;
+              this.purchases_poList['balance'] = balance;
+              
+            });
 
         if(z.projectKey != 'stock'){
           this.fb.retrieve(`tblprojects/${z.projectKey}`)
@@ -2202,13 +2569,13 @@ export class PrestigeService {
             isShow: true
           });
         }
+
+        
         
 
       });
 
-      this.purchases_poList['total'] = total;
-      this.purchases_poList['balance'] = balance;
-
+      
       console.log(this.purchases_poList)
     })
   }
@@ -2221,6 +2588,7 @@ export class PrestigeService {
       console.log(po.date.split('/'))
       po.isShow = po.date.split('/')[0] == mm && po.date.split('/')[2] == yy ? true : false;
       total+= po.isShow ? po.subTotal : 0;
+      total+= po.labor.subTotal;
     });
     this.purchases_poList.total = total;
     console.log(this.purchases_poList)
@@ -2355,7 +2723,7 @@ export class PrestigeService {
             if(z.po[key].type.toLowerCase() == 'aluminum'){
               let inches = this.fractionToInches(''+z.po[key].qty);
                   
-                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier);
+                  inches = this.roundOff(inches, 'aluminum', z.po[key].supplier, z.po[key].section, z.po[key].color);
                   console.log(inches)
                   z.po[key]['subtotal'] = ((z.po[key].price / z.po[key].baseSize) * inches) 
                   * z.po[key].numberOfSet;
@@ -2365,8 +2733,8 @@ export class PrestigeService {
               }
               else if(z.po[key].type.toLowerCase() == 'glass'){
                 console.log('PUMASOK SA TYPE GLASS')
-                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].suppliere);
-                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].suppliere);
+                  let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].suppliere, z.po[key].section, z.po[key].color);
+                  let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].suppliere, z.po[key].section, z.po[key].color);
                   // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                   let sqft = ((xWidth * xHeight) / 144);
                   z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2379,8 +2747,8 @@ export class PrestigeService {
           }
           else{
             if( z.po[key]['type'] == "Glass"){
-              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier);
-                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier);
+              let xWidth = this.roundOff(this.fractionToInches(''+z.po[key]['width']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
+                let xHeight = this.roundOff(this.fractionToInches(''+z.po[key]['height']), 'glass', z.po[key].supplier, z.po[key].section, z.po[key].color);
                 // z.po[key]['subtotal'] = (z.po[key]['price'] * xWidth * xHeight) * z.po[key]['numberOfSet'];
                 let sqft = ((xWidth * xHeight) / 144);
                 z.po[key]['subtotal'] = sqft * z.po[key]['price'] * z.po[key]['numberOfSet']
@@ -2801,8 +3169,8 @@ export class PrestigeService {
 
   //SUPPLIER
   supplierName: string;
-  listOfSupplier = [];
-
+  listOfSupplierLabor = [];
+  selectedLaborType: string = 'TYPE OF LABOR';
   addSupplier(data) {
     console.log(data)
     data['discount'] = '.0';

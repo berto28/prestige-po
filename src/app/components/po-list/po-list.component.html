@@ -1,5 +1,6 @@
 
-  <div class="card" *ngFor="let po of poList">
+  <ng-container *ngFor="let po of poList">
+  <div class="card marginBottom">
     <ng-container *ngIf="po.isShow">
       <div class="card-content">
         <span class="card-title teal-text"><b>PO #{{po.poNumber}}</b> <span class="right">{{po.date}}</span></span>
@@ -71,11 +72,13 @@
       <div class="row">
         <div class="col s6">
           <a class="btn red" (click)="cancelPO(po)">cancel po</a>
+          <a class="btn yellow darken-2 laborBtn modal-trigger" *ngIf="po['po'][0].type == 'Glass'" 
+          (click)="onClickLabor(po)" href="#modalLabor">labor</a>
         </div>
         <div class="col s6 right-align">
           <a *ngIf="po['po'][0].supplier != 'FROM STOCK'"
           class="btn waves-effect" [ngClass]="po.paid? poClass.paid : poClass.unpaid"
-          (click)="onClickPayPO(po.poKey)">
+          (click)="onClickPayPO(po.poKey, po.poNumber)">
           <i class="material-icons right" *ngIf="po.paid">check</i>
             <!-- {{po.paid ? 'Paid' : 'Unpaid' }} -->
             {{ po.paid.paidBy == 'check' ? 
@@ -96,6 +99,71 @@
           </a> -->
         </div>
       </div>
-      
+      <div class="card noMarginTop" *ngFor="let labor of po['labor']">
+        <div class="card-content">
+          <span class="card-title yellow-text text-darken-2"><b>PO #{{labor.poNumber}}</b> <span class="right">{{labor.date}}</span></span>
+          <span class="card-title yellow-text text-darken-2">{{labor.projectName}}</span>
+          <table class="highlight centered">
+            <thead>
+              <tr>
+                <th>Labor Type</th>
+                <th>Labor Supplier</th>
+                <th>Price</th>
+                <th>Item</th>
+                <th>QTY</th>
+                <th>Sub Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of labor['labor']">
+                <td>{{item.laborType}}</td>
+                <td>{{item.laborSupplier}}</td>
+                <td>{{item.price}}</td>
+                <td>{{item.item}}</td>
+                <td>{{item.numberOfset}}</td>
+                <td>{{item.total | number : '1.2-2'}}</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="yellow-text text-darken-2"><b>Total:</b></td>
+                <td class="yellow-text text-darken-2"><b> {{ labor.subTotal | number : '1.2-2' }} </b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <div class="col s6">
+              <a class="btn red" (click)="cancelLabor(labor)">cancel labor</a>
+          </div>
+          <div class="col s6 right-align">
+            <a class="btn waves-effect" [ngClass]="labor.paid? poClass.paid : poClass.unpaid"
+            (click)="onClickPayLabor(labor.laborKey, labor.poNumber)">
+            <i class="material-icons right" *ngIf="labor.paid">check</i>
+              <!-- <ng-container *ngIf="labor.paid != false"> -->
+                {{ labor.paid.paidBy == 'check' ? 
+                 (labor.paid.date+' | Paid by check#'+labor.paid.check) :
+                 labor.paid.paidBy == 'cash' ?
+                 (labor.paid.date+' | Paid by Cash | discount '+labor.paid.discount+'%') : 
+                 'Unpaid Labor' }}
+              <!-- </ng-container> -->
+            </a>
+            <!-- <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
+            class="btn waves-effect disabled">
+              from stock
+            </a> -->
+            <!-- <a *ngIf="po['po'][0].supplier == 'FROM STOCK'" 
+                class="btn waves-effect modal-trigger"
+                href="#cuttingList"
+            (click)="onClickViewCuttingList(po['po'])">
+              view cutting list
+            </a> -->
+          </div>
+        </div>
+      </div>
   </ng-container>
   </div>
+  <hr>
+</ng-container>
