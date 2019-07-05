@@ -16,6 +16,7 @@ export class StocksTableComponent implements OnInit {
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
+    this.prestige.getTypeSupplierSectionColorName();
     this.prestige.getStockMaterials(null, null, null);
     this.prestige.getStockPO();
     this.onWindowScroll();

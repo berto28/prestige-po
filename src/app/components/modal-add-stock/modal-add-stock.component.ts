@@ -9,6 +9,7 @@ import { PrestigeService } from '../../services/prestige.service';
 export class ModalAddStockComponent implements OnInit {
 
   constructor(public prestige: PrestigeService) { 
+    // prestige.getTypeSupplierSectionColorName();
     prestige.getSupplier();
   }
 

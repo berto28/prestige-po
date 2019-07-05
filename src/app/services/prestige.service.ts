@@ -282,14 +282,56 @@ export class PrestigeService {
   // CANVAS
   addCanvas(data): void{
     console.log(data)
-   
-    data.supplier.forEach( supplier => {
 
+      
+      data.color.forEach(color => {
+        console.log(data.typeName+' '+color.name)
+        let itemArray = [];
+        this.materialList_.forEach( m => {
+          if(m['typeKey'] == data.type && m['colorKey'] == color.key ){
+            itemArray.push(m)
+          }
+        });
+
+        let type = data.typeName.toUpperCase();
+        let col = color.name.toUpperCase();
+
+        type = `${type[0]}${type[1]}`;
+        col = `${col[0]}${col[1]}${col[col.length -1]}`;
+        
+
+        let wew  = itemArray[0].itemCode.replace(`${type}_${col}_`, '');
+
+
+        color['code'] = wew;
+      });
+
+      let accArray = [];
+      this.materialList_.forEach( m => {
+        if(m['typeKey'] == data.type ){
+          accArray.push(m)
+        }
+      });
+      let type = data.typeName.toUpperCase();
+      type = `${type[0]}${type[1]}`;
+      let accCode = accArray[0].itemCode.replace(`${type}_`,'');
+      console.log(accCode)
+
+      console.log(data.color)
+
+    data.supplier.forEach( supplier => {
+      
       data.section.forEach(section => {
         
         data.materials.forEach( m => {
 
           if(data.color.length == 0){
+            console.log(accCode)
+            let code =parseInt(accCode)+ 1;
+            let type = data.typeName.toUpperCase();
+            type = `${type[0]}${type[1]}`;
+      
+            let itemCode = accCode[0] == '0'? `${type}_0${code}`: `${type}_${code}`;
 
             this.fb.add('tblmaterials',
             {
@@ -299,6 +341,7 @@ export class PrestigeService {
               price: m.price,
               discount:  m.discount == undefined ? '.0' : '.'+m.discount,
               color: '-',
+              itemCode: itemCode,
               type: data.type
             }
             ).then( () => {
@@ -311,15 +354,17 @@ export class PrestigeService {
           else{
 
             data.color.forEach( color => {
+              
+              let code = parseInt(color.code) + 1;
 
-              // console.log({
-              //   supplier: supplier.key,
-              //   section: section.key,
-              //   material: m.name,
-              //   price: m.price,
-              //   color: color.key,
-              //   type: data.type
-              // })
+              console.log(code)
+              let type = data.typeName.toUpperCase();
+              let col = color.name.toUpperCase();
+      
+              type = `${type[0]}${type[1]}`;
+              col = `${col[0]}${col[1]}${col[col.length -1]}`;
+              
+              let itemCode = color.code[0] == '0' ? `${type}_${col}_0${code}` : `${type}_${col}_${code}`;
 
               this.fb.add('tblmaterials',
                 {
@@ -329,7 +374,8 @@ export class PrestigeService {
                   price: m.price,
                   color: color.key,
                   discount:   m.discount == undefined ? '.0' : '.'+m.discount,
-                  type: data.type
+                  type: data.type,
+                  itemCode: itemCode
                 }
               ).then( () => {
                 this.M.toast(`
@@ -337,7 +383,8 @@ export class PrestigeService {
                 `)
                 this.materials = [];
               });
-            
+
+              color.code = code;
             });
           }
           
@@ -345,23 +392,8 @@ export class PrestigeService {
         });
 
       });
-      // this.fb.add('tblmaterials',
-      //   {
-      //     supplier: data.supplier,
-      //     section: data.section,
-      //     color: data.color == null ? '-': data.color,
-      //     materialName: m.name,
-      //     price: m.price,
-      //     type: data.type
-      //   }
-      // ).then( () => {
-      //   this.M.toast(`
-      //     <span class="green-text">${m.name}</span>&nbsp;material has been addedd.
-      //   `)
-      //   this.materials = [];
-      // });
 
-    })
+    });
   }
 
   editCanvas(data): void{
@@ -401,10 +433,10 @@ export class PrestigeService {
   }
   searchText = '';
   searchCanvas(search){
-    this.searchText = search;
+    this.searchText = search.toLowerCase();
     this.materialList = [];
     this.toBeSearch.forEach( x => {
-      x['materialName'].toLowerCase().match(search) ? this.materialList.push(x) : '';
+      x['materialName'].toLowerCase().match(search) || x['itemCode'].toLowerCase().match(search) ? this.materialList.push(x) : '';
     });
     
   }
@@ -412,7 +444,8 @@ export class PrestigeService {
   searchStock(search){
     this.stockList = [];
     this.stockList_.forEach( x => {
-      x['materialName'].toLowerCase().match(search) ? this.stockList.push(x) : '';
+      x['materialName'].toLowerCase().match(search.toLowerCase()) || 
+      x['itemCode'].toLowerCase().match(search.toLowerCase()) ? this.stockList.push(x) : '';
     });
   }
 
@@ -433,104 +466,135 @@ export class PrestigeService {
         x['key'] = element.key;
         // x['discount'] = '.0';
         x['sellingPrice'] = 0;
-        this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
+        // this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
              
-          let typeRes = rType.toJSON();
-          let typeKey = x.type;
-          x['type'] = typeRes['name'];
-          x['typeKey'] = typeKey;
-          // ctr+=1;
-          // if(ctr >= 4){
-          //   this.materialList.unshift(x);
-          //   console.log(this.materialList)
-          //   ctr = 0;
-          // }
-        
-        });
+        //   let typeRes = rType.toJSON();
+        //   let typeKey = x.type;
+        //   x['type'] = typeRes['name'];
+        //   x['typeKey'] = typeKey;
+        // });
+        console.log(this.__typeArray)
+        for(let typeRes of this.__typeArray){
+          if(typeRes.key == x.type){
+            let typeKey = x.type;
+            x['type'] = typeRes['name'];
+            x['typeKey'] = typeKey;
+            break;
+          }
+        }
 
-        this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
-          let supplierRes = rSupplier.toJSON();
-          let supplierKey = x.supplier;
+        // this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
+        //   let supplierRes = rSupplier.toJSON();
+        //   let supplierKey = x.supplier;
 
-          x['supplier'] = supplierRes['name'];
-          x['supplierKey'] = supplierKey;
+        //   x['supplier'] = supplierRes['name'];
+        //   x['supplierKey'] = supplierKey;
 
-          if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
-            x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
+        //   if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
+        //     x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
             
-            if(supplierRes['colorDiscount'] == undefined){
+        //     if(supplierRes['colorDiscount'] == undefined){
               
-              x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+        //       x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+        //     }
+        //     else{
+        //       for(let discount of Object.values(supplierRes['colorDiscount'])){
+        //         if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
+        //           x['discount'] = '.'+discount['discount'];
+        //           break;
+        //         }
+        //       }
+        //       // x['discount'] = supplierRes['discount'];
+        //       x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+        //     }
+        //   }
+        //   else{
+        //     x['sellingPrice'] = x['price'];
+        //   }
+        // });
+
+        console.log(this.__supplierArray)
+        for(let supplierRes of this.__supplierArray){
+          if(supplierRes.key == x.supplier){
+            let supplierKey = x.supplier;
+            x['supplier'] = supplierRes['name'];
+            x['supplierKey'] = supplierKey;
+
+            if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
+              x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
+              
+              if(supplierRes['colorDiscount'] == undefined){
+                
+                x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+              }
+              else{
+                for(let discount of Object.values(supplierRes['colorDiscount'])){
+                  if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
+                    x['discount'] = '.'+discount['discount'];
+                    break;
+                  }
+                }
+                // x['discount'] = supplierRes['discount'];
+                x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+              }
             }
             else{
-              for(let discount of Object.values(supplierRes['colorDiscount'])){
-                if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
-                  x['discount'] = '.'+discount['discount'];
-                  break;
-                }
-              }
-              // x['discount'] = supplierRes['discount'];
-              x['sellingPrice'] = x['price'] - (x['price'] * x['discount']);
+              x['sellingPrice'] = x['price'];
             }
+
+            break;
           }
-          else{
-            x['sellingPrice'] = x['price'];
+        }
+
+        // this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
+        //   let sectionRes = rSection.toJSON();
+        //   let sectionKey = x.section;
+        //   x['section'] = sectionRes['name'];
+        //   x['sectionKey'] = sectionKey;
+        // });
+
+        console.log(this.__sectionArray)
+        for(let sectionRes of this.__sectionArray){
+          if(sectionRes.key == x.section){
+            let sectionKey = x.section;
+            x['section'] = sectionRes['name'];
+            x['sectionKey'] = sectionKey;
+            break;
           }
-          
-          // ctr+=1;
-          // if(ctr >= 4){
-          //   this.materialList.unshift(x);
-          //   console.log(this.materialList)
-          //   ctr = 0;
-          // }
+        }
 
-          
-
-        });
-
-        this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
-          let sectionRes = rSection.toJSON();
-          let sectionKey = x.section;
-          x['section'] = sectionRes['name'];
-          x['sectionKey'] = sectionKey;
-
-          // ctr+=1;
-          // if(ctr >= 4){
-          //   this.materialList.unshift(x);
-          //   console.log(this.materialList)
-          //   ctr = 0;
-          // }
-          
-        });
-
-        this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
+        // this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
              
-          let colorRes = rColor.toJSON();
-          if(colorRes != null){
-            let colorKey = x.color;
+        //   let colorRes = rColor.toJSON();
+        //   if(colorRes != null){
+        //     let colorKey = x.color;
             
-            x['color'] = colorRes['name'];
-            x['colorKey'] = colorKey;
+        //     x['color'] = colorRes['name'];
+        //     x['colorKey'] = colorKey;
 
+        //   }
+        // });
+        console.log(this.__colorArray)
+        for(let colorRes of this.__colorArray){
+          if(colorRes.key == x.color){
+            if(colorRes != null){
+              let colorKey = x.color;
+              
+              x['color'] = colorRes['name'];
+              x['colorKey'] = colorKey;
+  
+            }
+            break;
           }
-         
-          // ctr+=1;
-          // if(ctr >= 4){
-          //   this.materialList.unshift(x);
-          //   console.log(this.materialList)
-          //   ctr = 0;
-          // }
-        });
-
-        this.materialList.unshift(x);
-       
+        }
         
+        this.materialList.unshift(x);
         
       });
       this.materialList_ = this.materialList;
       console.log(this.materialList)
       // this.getCanvasUsingDropdown(this.canvas_supplierPick, this.canvas_sectionPick, this.canvas_colorPick)
-      this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
+      // this.filterCanvas(this.materialType, this.materialSupplier, this.materialSection, this.materialColor);
     });
   }
   toBeSearch = [];
@@ -539,7 +603,7 @@ export class PrestigeService {
 
     let newList = [];
     this.materialList_.forEach( x => {
-
+      // console.log(typeKey +'--'+ x['typeKey'])
       if(typeKey == x['typeKey'] && 
         supplierKey == null && 
         sectionKey == null && 
@@ -695,6 +759,7 @@ export class PrestigeService {
 
     });
     console.log(newList)
+
     this.materialList = newList;
     this.toBeSearch = newList;
 
@@ -841,19 +906,26 @@ export class PrestigeService {
       });
 
       this.fb.retrieve('tblpo').subscribe((res) => {
-
+        
         if(res.length != 0){
           let currentPONumber: any;
           res.forEach( x => {
             currentPONumber = x.payload.toJSON().poNumber;
-          })
-
+            
+          });
           let today = new Date();
           let mm = String(today.getMonth() + 1).padStart(2, '0');
           let yy = today.getFullYear();
-          console.log(currentPONumber.split(`${yy}_${mm}`))
-          this.poNumber = `${yy}_${mm}${parseInt(currentPONumber.split(`${yy}_${mm}`)[1])+1}`;
-          console.log(this.poNumber)
+          
+          if(currentPONumber.match(`${yy}_${mm}`)){
+            console.log(currentPONumber.split(`${yy}_${mm}`))
+            this.poNumber = `${yy}_${mm}${parseInt(currentPONumber.split(`${yy}_${mm}`)[1])+1}`;
+            console.log(this.poNumber)
+          }
+          else{
+
+          }
+          
         }
       });
       
@@ -873,38 +945,77 @@ export class PrestigeService {
 
             Object.keys(z.po).map((key) => {
               console.log(z.po[key].typeKey)
-              this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
+              // this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
              
-                let typeRes = rType.toJSON();
-                if(typeRes != null){
-                 z.po[key]['type'] = typeRes['name'];
-                }
-              });
+              //   let typeRes = rType.toJSON();
+              //   if(typeRes != null){
+              //    z.po[key]['type'] = typeRes['name'];
+              //   }
+              // });
     
-    
-              this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
-                let supplierRes = rSupplier.toJSON();
-                if(supplierRes != null){
-                 z.po[key].supplier = supplierRes['name'];
+              console.log(this.__typeArray)
+              for(let typeRes of this.__typeArray){
+                if(typeRes.key == z.po[key].typeKey){
+                  if(typeRes != null){
+                   z.po[key]['type'] = typeRes['name'];
+                  }
+                  break;
                 }
-              });
+              }
     
-              this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
-                let sectionRes = rSection.toJSON();
-                if(sectionRes != null){
-                  z.po[key].section = sectionRes['name'];
-                }
-              });
+              // this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
+              //   let supplierRes = rSupplier.toJSON();
+              //   if(supplierRes != null){
+              //    z.po[key].supplier = supplierRes['name'];
+              //   }
+              // });
 
-              this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
-                   
-                let colorRes = rColor.toJSON();
-                if(colorRes != null){
-                  
-                  z.po[key].color = colorRes['name'];
-      
+              console.log(this.__supplierArray)
+              for(let supplierRes of this.__supplierArray){
+                if(supplierRes.key == z.po[key].supplierKey){
+                  if(supplierRes != null){
+                   z.po[key].supplier = supplierRes['name'];
+                  }
+                  break;
                 }
-              });
+              }
+    
+              // this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
+              //   let sectionRes = rSection.toJSON();
+              //   if(sectionRes != null){
+              //     z.po[key].section = sectionRes['name'];
+              //   }
+              // });
+
+              console.log(this.__sectionArray)
+              for(let sectionRes of this.__sectionArray){
+                if(sectionRes.key == z.po[key].sectionKey){
+                  if(sectionRes != null){
+                    z.po[key].section = sectionRes['name'];
+                  }
+                  break;
+                }
+              }
+
+              // this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
+                   
+              //   let colorRes = rColor.toJSON();
+              //   if(colorRes != null){
+                  
+              //     z.po[key].color = colorRes['name'];
+      
+              //   }
+              // });
+
+              console.log(this.__colorArray)
+              for(let colorRes of this.__colorArray){
+                if(colorRes.key == z.po[key].colorKey){
+                  if(colorRes != null){
+                    z.po[key].color = colorRes['name'];
+                  }
+                  break;
+                }
+              }
 
               if(z.po[key].supplier == 'FROM STOCK'){
 
@@ -1181,61 +1292,125 @@ export class PrestigeService {
         res.forEach(element => {
           let x = element.payload.toJSON();
           
-          this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
+          // this.fb.onceRetrieve(`tbltype/${x.type}`).once('value', (rType) => {
              
-            let typeRes = rType.toJSON();
-            let typeKey = x.type;
-            x['type'] = typeRes['name'];
-            x['typeKey'] = typeKey;
-          });
+          //   let typeRes = rType.toJSON();
+          //   let typeKey = x.type;
+          //   x['type'] = typeRes['name'];
+          //   x['typeKey'] = typeKey;
+          // });
 
-
-          this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
-            let supplierRes = rSupplier.toJSON();
-            let supplierKey = x.supplier;
-  
-            x['supplier'] = supplierRes['name'];
-            x['supplierKey'] = supplierKey;
-
-            if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
-            x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
-            
-            if(supplierRes['colorDiscount'] == undefined){
-              x['price'] = x['price'] - (x['price'] * x['discount']);
-              
-            }
-            else{
-              for(let discount of Object.values(supplierRes['colorDiscount'])){
-                if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
-                  x['discount'] = '.'+discount['discount'];
-                  break;
-                }
-              }
-              // x['discount'] = supplierRes['discount'];
-              x['price'] = x['price'] - (x['price'] * x['discount']);
+          console.log(this.__typeArray)
+          for(let typeRes of this.__typeArray){
+            if(typeRes.key == x.type){
+              let typeKey = x.type;
+              x['type'] = typeRes['name'];
+              x['typeKey'] = typeKey;
+              break;
             }
           }
-         
-          });
 
-          this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
-            let sectionRes = rSection.toJSON();
-            let sectionKey = x.section;
-            x['section'] = sectionRes['name'];
-            x['sectionKey'] = sectionKey;
-          });
-
-          this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
-               
-            let colorRes = rColor.toJSON();
-            if(colorRes != null){
-              let colorKey = x.color;
-              
-              x['color'] = colorRes['name'];
-              x['colorKey'] = colorKey;
+          // this.fb.onceRetrieve(`tblsupplier/${x.supplier}`).once('value', (rSupplier) => {
+          //   let supplierRes = rSupplier.toJSON();
+          //   let supplierKey = x.supplier;
   
+          //   x['supplier'] = supplierRes['name'];
+          //   x['supplierKey'] = supplierKey;
+
+          //   if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
+          //   x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
+            
+          //   if(supplierRes['colorDiscount'] == undefined){
+          //     x['price'] = x['price'] - (x['price'] * x['discount']);
+              
+          //   }
+          //   else{
+          //     for(let discount of Object.values(supplierRes['colorDiscount'])){
+          //       if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
+          //         x['discount'] = '.'+discount['discount'];
+          //         break;
+          //       }
+          //     }
+          //     // x['discount'] = supplierRes['discount'];
+          //     x['price'] = x['price'] - (x['price'] * x['discount']);
+          //   }
+          // }
+         
+          // });
+
+          console.log(this.__supplierArray)
+          for(let supplierRes of this.__supplierArray){
+            if(supplierRes.key == x.supplier){
+              let supplierKey = x.supplier;
+  
+                x['supplier'] = supplierRes['name'];
+                x['supplierKey'] = supplierKey;
+    
+                if(x['type'] == 'Aluminum' || x['type'] == '-LfrXIbaYI6yVn0Ya45_' ||
+                x['type'] == 'Accessories' || x['type'] == '-LfrY-Rw60DED2ptqEOK' ){
+                
+                if(supplierRes['colorDiscount'] == undefined){
+                  x['price'] = x['price'] - (x['price'] * x['discount']);
+                  
+                }
+                else{
+                  for(let discount of Object.values(supplierRes['colorDiscount'])){
+                    if(discount['key'] == x['color'] || discount['key'] == x['colorKey']){
+                      x['discount'] = '.'+discount['discount'];
+                      break;
+                    }
+                  }
+                  // x['discount'] = supplierRes['discount'];
+                  x['price'] = x['price'] - (x['price'] * x['discount']);
+                }
+              }
+              break;
             }
-          });
+          }
+
+          // this.fb.onceRetrieve(`tblsection/${x.section}`).once('value', (rSection) => {
+          //   let sectionRes = rSection.toJSON();
+          //   let sectionKey = x.section;
+          //   x['section'] = sectionRes['name'];
+          //   x['sectionKey'] = sectionKey;
+          // });
+
+          console.log(this.__sectionArray)
+          for(let sectionRes of this.__sectionArray){
+            if(sectionRes.key == x.section){
+              let sectionKey = x.section;
+              x['section'] = sectionRes['name'];
+              x['sectionKey'] = sectionKey;
+              break;
+            }
+          }
+
+          // this.fb.onceRetrieve(`tblcolor/${x.color}`).once('value', (rColor) => {
+               
+          //   let colorRes = rColor.toJSON();
+          //   if(colorRes != null){
+          //     let colorKey = x.color;
+              
+          //     x['color'] = colorRes['name'];
+          //     x['colorKey'] = colorKey;
+  
+          //   }
+          // });
+
+          console.log(this.__colorArray)
+          for(let colorRes of this.__colorArray){
+            if(colorRes.key == x.color){
+              let sectionKey = x.section;
+              if(colorRes != null){
+                let colorKey = x.color;
+                
+                x['color'] = colorRes['name'];
+                x['colorKey'] = colorKey;
+    
+              }
+              break;
+            }
+          }
           // x.section == data.section ? this.projects_materialList.unshift(x) : ''
           x['isShow'] = true;
           x['isCheck'] = true;
@@ -1245,7 +1420,10 @@ export class PrestigeService {
           x['materialKey'] = element.payload.key;
 
           this.projects_materialList.unshift(x);
-        })
+          
+        });
+
+        console.log(this.projects_materialList)
         // console.log(section, color)
         // console.log(this.projects_materialList)
         this.sortMaterials(section, color, type)
@@ -1254,8 +1432,8 @@ export class PrestigeService {
   }
 
   sortMaterials(section, color, type){
-    console.log(section+'---'+color)
-    console.log(color)
+    // console.log(section+'---'+color)
+    // console.log(color)
     this.projects_materialList.forEach( m =>  {
       
       if(type.key == m.typeKey){
@@ -1327,6 +1505,7 @@ export class PrestigeService {
       }
       else if(data[0].type == 'Accessories'){
         this.getAccessoriesCut(data, projectKey, date);
+        this.addOutStock(data, date);
       }
     }
     else{
@@ -2206,38 +2385,77 @@ export class PrestigeService {
         Object.keys(z.po).map((key) => {
           z.po[key]['subtotal'] = (z.po[key].price * z.po[key].numberOfSet);
 
-          this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
+          // this.fb.onceRetrieve(`tbltype/${z.po[key].typeKey}`).once('value', (rType) => {
              
-            let typeRes = rType.toJSON();
-            if(typeRes != null){
-             z.po[key]['type'] = typeRes['name'];
-            }
-          });
+              //   let typeRes = rType.toJSON();
+              //   if(typeRes != null){
+              //    z.po[key]['type'] = typeRes['name'];
+              //   }
+              // });
+    
+              console.log(this.__typeArray)
+              for(let typeRes of this.__typeArray){
+                if(typeRes.key == z.po[key].typeKey){
+                  if(typeRes != null){
+                   z.po[key]['type'] = typeRes['name'];
+                  }
+                  break;
+                }
+              }
+    
+              // this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
+              //   let supplierRes = rSupplier.toJSON();
+              //   if(supplierRes != null){
+              //    z.po[key].supplier = supplierRes['name'];
+              //   }
+              // });
 
+              console.log(this.__supplierArray)
+              for(let supplierRes of this.__supplierArray){
+                if(supplierRes.key == z.po[key].supplierKey){
+                  if(supplierRes != null){
+                   z.po[key].supplier = supplierRes['name'];
+                  }
+                  break;
+                }
+              }
+    
+              // this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
+              //   let sectionRes = rSection.toJSON();
+              //   if(sectionRes != null){
+              //     z.po[key].section = sectionRes['name'];
+              //   }
+              // });
 
-          this.fb.onceRetrieve(`tblsupplier/${z.po[key].supplierKey}`).once('value', (rSupplier) => {
-            let supplierRes = rSupplier.toJSON();
-            if(supplierRes != null){
-             z.po[key].supplier = supplierRes['name'];
-            }
-          });
+              console.log(this.__sectionArray)
+              for(let sectionRes of this.__sectionArray){
+                if(sectionRes.key == z.po[key].sectionKey){
+                  if(sectionRes != null){
+                    z.po[key].section = sectionRes['name'];
+                  }
+                  break;
+                }
+              }
 
-          this.fb.onceRetrieve(`tblsection/${z.po[key].sectionKey}`).once('value', (rSection) => {
-            let sectionRes = rSection.toJSON();
-            if(sectionRes != null){
-              z.po[key].section = sectionRes['name'];
-            }
-          });
+              // this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
+                   
+              //   let colorRes = rColor.toJSON();
+              //   if(colorRes != null){
+                  
+              //     z.po[key].color = colorRes['name'];
+      
+              //   }
+              // });
 
-          this.fb.onceRetrieve(`tblcolor/${z.po[key].colorKey}`).once('value', (rColor) => {
-               
-            let colorRes = rColor.toJSON();
-            if(colorRes != null){
-              
-              z.po[key].color = colorRes['name'];
-  
-            }
-          });
+              console.log(this.__colorArray)
+              for(let colorRes of this.__colorArray){
+                if(colorRes.key == z.po[key].colorKey){
+                  if(colorRes != null){
+                    z.po[key].color = colorRes['name'];
+                  }
+                  break;
+                }
+              }
           
           
           if(z.po[key].supplier == 'FROM STOCK'){
@@ -2601,18 +2819,51 @@ export class PrestigeService {
     console.log(this.stockList)
     let poToEdit = [];
     let check = [];
-
+    let wewKey = [];
     for(let x of data){
       for(let y of this.stockList){
-        if(x.materialName.match(y.materialName) && x.section.match(y.section)){
-          poToEdit.includes({
-            numberOfSet: x.numberOfSet,
-            material: y
-          }) ? '' : poToEdit.push({
-            numberOfSet: x.numberOfSet,
-            material: y
-          });
-          break;
+        console.log(x.materialKey+'   '+y.materialkey)
+        if(x.materialKey == y.materialkey){
+          console.log('wew')
+
+          if(x.type == "Glass"){
+            let baseSize = `${x.width}ft x ${x.height}ft`;
+
+            console.log(baseSize +' -- '+ y.baseSize)
+            if(baseSize.match(y.baseSize)){
+              console.log('nag match yung size ng glass')
+              if(wewKey.includes(x.materialKey)){}
+              else{
+                wewKey.push(x.materialKey);
+                poToEdit.push({
+                  numberOfSet: x.numberOfSet,
+                  material: y
+                });
+                break;
+              }
+            }
+          }
+          else{
+            if(wewKey.includes(x.materialKey)){}
+            else{
+              wewKey.push(x.materialKey);
+              poToEdit.push({
+                numberOfSet: x.numberOfSet,
+                material: y
+              });
+              break;
+            }
+          }
+
+         
+          // poToEdit.includes({
+          //   numberOfSet: x.numberOfSet,
+          //   material: y
+          // }) ? '' : poToEdit.push({
+          //   numberOfSet: x.numberOfSet,
+          //   material: y
+          // });
+          // break;
         }
       }
     }
@@ -2621,7 +2872,7 @@ export class PrestigeService {
     if(poToEdit.length !=0){
       poToEdit.forEach( x => {
         this.fb.edit('tblstock', x.material.stockKey, {
-          qty: x.material.numberOfStock + x.numberOfSet,
+          qty: parseInt(x.material.numberOfStock) + parseInt(x.numberOfSet),
           date: date
         })
         .then(() => {
@@ -2646,8 +2897,7 @@ export class PrestigeService {
       let isProceed = true;
 
       for(let y of poToEdit){
-        if(x.materialName.match(y.material.materialName) &&
-          x.section.match(y.material.section)){
+        if(x.materialKey == y.material.materialkey){
             isProceed = false;
             break;
         }
@@ -2862,41 +3112,79 @@ export class PrestigeService {
       res.forEach( x => {
         let materialkey = x.payload.toJSON().materialKey;
         let materialObj = {};
-
+        materialObj['materialkey'] = materialkey;
         this.fb.retrieve(`tblmaterials/${materialkey}`)
         .subscribe(m => {
           materialObj['color'] = m[0].payload.toJSON();
-          materialObj['materialName'] = m[2].payload.toJSON();
-          materialObj['section'] = m[4].payload.toJSON();
+          materialObj['itemCode'] =  m[2].payload.toJSON();
+          materialObj['materialName'] = m[3].payload.toJSON();
+          materialObj['section'] = m[5].payload.toJSON();
           materialObj['supplier'] = 'FROM STOCK';
-          materialObj['type'] = m[6].payload.toJSON();
+          materialObj['type'] = m[7].payload.toJSON();
 
-          this.fb.onceRetrieve(`tbltype/${m[6].payload.toJSON()}`).once('value', (rType) => {
+          // this.fb.onceRetrieve(`tbltype/${m[7].payload.toJSON()}`).once('value', (rType) => {
              
-            let typeRes = rType.toJSON();
-            console.log(typeRes['name'])
-            materialObj['type'] = typeRes['name'];
-            materialObj['typeKey'] = m[6].payload.toJSON();
-            console.log(materialObj)
-          });
+          //   let typeRes = rType.toJSON();
+          //   materialObj['type'] = typeRes['name'];
+          //   materialObj['typeKey'] = m[7].payload.toJSON();
+          // });
+          console.log(this.__typeArray)
+          for(let typeRes of this.__typeArray){
+            if(typeRes.key == m[7].payload.toJSON()){
+              materialObj['type'] = typeRes['name'];
+              materialObj['typeKey'] = m[7].payload.toJSON();
+              break;
+            }
+          }
 
+           // this.fb.onceRetrieve(`tblsupplier/${m[6].payload.toJSON()}`).once('value', (rSupplier) => {
+          //   let supplierRes = rSupplier.toJSON();
+          //   materialObj['fromSupplier'] = supplierRes['name'];
+          // });
+
+          console.log(this.__supplierArray)
+          for(let supplierRes of this.__supplierArray){
+            if(supplierRes.key == m[6].payload.toJSON()){
+              materialObj['fromSupplier'] = supplierRes['name'];
+              break;
+            }
+          }
+         
           
-          this.fb.onceRetrieve(`tblsection/${m[4].payload.toJSON()}`).once('value', (rSection) => {
-            let sectionRes = rSection.toJSON();
-            let sectionKey = x.section;
-            materialObj['section'] =sectionRes['name'];
-            materialObj['sectionKey'] = m[4].payload.toJSON();
-          });;
+          // this.fb.onceRetrieve(`tblsection/${m[5].payload.toJSON()}`).once('value', (rSection) => {
+          //   let sectionRes = rSection.toJSON();
+          //   let sectionKey = x.section;
+          //   materialObj['section'] =sectionRes['name'];
+          //   materialObj['sectionKey'] = m[5].payload.toJSON();
+          // });;
 
-          this.fb.onceRetrieve(`tblcolor/${m[0].payload.toJSON()}`).once('value', (rColor) => {
+          console.log(this.__sectionArray)
+          for(let sectionRes of this.__sectionArray){
+            if(sectionRes.key == m[5].payload.toJSON()){
+              materialObj['section'] =sectionRes['name'];
+              materialObj['sectionKey'] = m[5].payload.toJSON();
+              break;
+            }
+          }
+
+          // this.fb.onceRetrieve(`tblcolor/${m[0].payload.toJSON()}`).once('value', (rColor) => {
                
-            let colorRes = rColor.toJSON();
-            if(colorRes != null){
+          //   let colorRes = rColor.toJSON();
+          //   if(colorRes != null){
               
+          //     materialObj['color'] = colorRes['name'];
+          //     materialObj['colorKey'] = m[0].payload.toJSON();
+          //   }
+          // });
+
+          console.log(this.__colorArray)
+          for(let colorRes of this.__colorArray){
+            if(colorRes.key == m[0].payload.toJSON()){
               materialObj['color'] = colorRes['name'];
               materialObj['colorKey'] = m[0].payload.toJSON();
+              break;
             }
-          });
+          }
 
           
         })
@@ -2913,6 +3201,7 @@ export class PrestigeService {
         materialObj['glassCutStyle']= false;
         materialObj['numberOfStock'] = x.payload.toJSON().qty;
         materialObj['date'] = x.payload.toJSON().date;
+        
 
         this.stockList.unshift(materialObj);
         
@@ -3053,7 +3342,7 @@ export class PrestigeService {
           .subscribe( mRes => {
 
             obj['color'] = mRes[0].payload.toJSON();
-            obj['materialName'] = mRes[1].payload.toJSON();
+            obj['materialName'] = mRes[3].payload.toJSON();
             
           });
 
@@ -3087,7 +3376,7 @@ export class PrestigeService {
           .subscribe( mRes => {
 
             obj['color'] = mRes[0].payload.toJSON();
-            obj['materialName'] = mRes[1].payload.toJSON();
+            obj['materialName'] = mRes[3].payload.toJSON();
 
           });
 
@@ -3127,6 +3416,7 @@ export class PrestigeService {
       console.log('successfully added')
       this.typeName = '';
       this.M.toast(`<span class="green-text">${data}</span>&nbsp;material has been addedd.`);
+      this.__typeArray = [];
     });
   }
 
@@ -3154,6 +3444,7 @@ export class PrestigeService {
     })
     .then( () => {
       console.log('successfully Updated')
+      this.__typeArray = [];
     });
   }
 
@@ -3163,6 +3454,7 @@ export class PrestigeService {
     this.fb.delete('tbltype', data.key)
     .then(() => {
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Type has been deleted.`)
+      this.__typeArray = [];
     });
   }
   //TYPE
@@ -3178,6 +3470,7 @@ export class PrestigeService {
     .then( () => {
       console.log('Supplier added');
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Supplier has been addedd.`)
+      this.__supplierArray = [];
     });
   }
   
@@ -3237,7 +3530,7 @@ export class PrestigeService {
             key: key
           });
 
-          console.log(types_)
+          // console.log(types_)
         });
        
       });
@@ -3253,6 +3546,7 @@ export class PrestigeService {
     })
     .then( () => {
       console.log('successfully Updated')
+      this.__supplierArray = []; 
     })
   }
 
@@ -3262,6 +3556,7 @@ export class PrestigeService {
     this.fb.delete('tblsupplier', data.key)
     .then(() => {
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Supplier has been deleted.`)
+      this.__supplierArray = [];
     });
   }
   //SUPPLIER
@@ -3276,6 +3571,7 @@ export class PrestigeService {
     .then( () => {
       console.log('section added');
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Section has been addedd.`)
+      this.__sectionArray = [];
     });
   }
 
@@ -3328,6 +3624,7 @@ export class PrestigeService {
     })
     .then( () => {
       console.log('successfully Updated')
+      this.__sectionArray = [];
     })
   }
 
@@ -3337,6 +3634,7 @@ export class PrestigeService {
     this.fb.delete('tblsection', data.key)
     .then(() => {
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Section has been deleted.`)
+      this.__sectionArray = [];
     });
   }
   //SECTION
@@ -3351,6 +3649,7 @@ export class PrestigeService {
     .then( () => {
       console.log('color added')
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Color has been addedd.`)
+      this.__colorArray = [];
     });
   }
 
@@ -3403,6 +3702,7 @@ export class PrestigeService {
     })
     .then( () => {
       console.log('successfully Updated')
+      this.__colorArray = [];
     })
   }
 
@@ -3412,6 +3712,7 @@ export class PrestigeService {
     this.fb.delete('tblcolor', data.key)
     .then(() => {
       this.M.toast(`<span class="green-text">${data.name}</span>&nbsp;Color has been deleted.`)
+      this.__colorArray = [];
     });
   }
   // COLOR
@@ -3468,33 +3769,50 @@ export class PrestigeService {
       console.log(this.colorCheckBox)
       this.dropdownColor.arr = this.colorCheckBox;
 
-    });
+      this.fb.onceRetrieve('tblsupplier').once('value', (r) => {
+        let res = r.toJSON();
+        this.supplierCheckBox = [];
+        Object.keys(res).map((key) => {
 
-    this.fb.onceRetrieve('tblsupplier').once('value', (r) => {
-      let res = r.toJSON();
-      this.supplierCheckBox = [];
-      Object.keys(res).map((key) => {
-       res[key].types.match(data.key) ?  this.supplierCheckBox.push({
-         key: key,
-         name: res[key].name,
-         isCheck: false,
-         colors: res[key].colorDiscount == undefined ? this.colorCheckBox : Object.values(res[key].colorDiscount)
-       }) : '';
+          // if(res[key].colorDiscount){
+              
+          //   for(let w of Object.values(res[key].colorDiscount)){
+          //     this.colorCheckBox.forEach( c => {
+          //       if(c['key'] == w['key']){
+          //         c['discount'] = w['discount'];
+          //         // break;
+          //       }
+          //     });
+          //   }
+           
+          // }
+  
+         res[key].types.match(data.key) ?  this.supplierCheckBox.push({
+           key: key,
+           name: res[key].name,
+           isCheck: false,
+          //  colors: this.colorCheckBox
+           colors: res[key].colorDiscount == undefined ? this.colorCheckBox : Object.values(res[key].colorDiscount)
+         }) : '';
+        });
+  
+        this.supplierCheckBox.sort(function (a, b) {
+            if (a.name < b.name) {
+                return -1;
+            }
+            return 0;
+        });
+        
+        console.log(this.supplierCheckBox)
+  
+        this.dropdownSupplier.arr = this.supplierCheckBox;
+  
+        this.M.inputFields();
       });
 
-      this.supplierCheckBox.sort(function (a, b) {
-          if (a.name < b.name) {
-              return -1;
-          }
-          return 0;
-      });
-      
-      console.log(this.supplierCheckBox)
-
-      this.dropdownSupplier.arr = this.supplierCheckBox;
-
-      this.M.inputFields();
     });
+
+   
   }
 
   deleteScrap(data){
@@ -3522,6 +3840,111 @@ export class PrestigeService {
       })
     });
     
+  }
+
+  itemCode(){
+    // this.fb.retrieveWithCondition('tblmaterials', 'type', '-LfrY-Rw60DED2ptqEOK')
+    // .subscribe(res => {
+    //   let ctr = 1;
+    //   let today = new Date();
+    //   let mm = String(today.getMonth() + 1).padStart(2, '0');
+      
+    //   res.forEach(element => {
+    //     let z = element.payload.toJSON();
+
+    //     // if(z.color == '-Lfx_SQtRECrBl8YIgNu'){
+    //       console.log(z)
+    //       // let itemCode = `AC_${mm}${ctr}`
+    //       // console.log(ctr)
+
+         
+
+    //       // this.fb.edit('tblmaterials', element.payload.key, {
+    //       //   itemCode: itemCode
+    //       // })
+    //       // .then(() => {
+    //       //   console.log(itemCode)
+           
+    //       // })
+    //       // ctr+=1;
+          
+    //     // }
+        
+    //   });
+
+    // })
+  }
+  __typeArray = [];
+  __supplierArray = [];
+  __sectionArray = [];
+  __colorArray = [];
+
+  getTypeSupplierSectionColorName(){
+
+    if(this.__typeArray.length == 0){
+      this.fb.retrieve('tbltype')
+      .subscribe(res => {
+        this.__typeArray = [];
+        res.forEach(element => {
+          let z = element.payload.toJSON();
+          this.__typeArray.push({
+            name: z.name,
+            key: element.payload.key
+          })
+        });
+
+        console.log(this.__typeArray)
+      });
+    }
+
+    if(this.__supplierArray.length == 0){
+      this.fb.retrieve('tblsupplier')
+      .subscribe(res => {
+        this.__supplierArray = [];
+        res.forEach(element => {
+          let z = element.payload.toJSON();
+          this.__supplierArray.push({
+            name: z.name,
+            [z.colorDiscount !=null ?  "colorDiscount": "colorDiscount" ] : z.colorDiscount,
+            key: element.payload.key
+          })
+        });
+
+        console.log(this.__supplierArray)
+      });
+    }
+
+    if(this.__sectionArray.length == 0){
+      this.fb.retrieve('tblsection')
+      .subscribe(res => {
+        this.__sectionArray = [];
+        res.forEach(element => {
+          let z = element.payload.toJSON();
+          this.__sectionArray.push({
+            name: z.name,
+            key: element.payload.key
+          })
+        });
+
+        console.log(this.__sectionArray)
+      });
+    }
+
+    if(this.__colorArray.length == 0){
+      this.fb.retrieve('tblcolor')
+      .subscribe(res => {
+        this.__colorArray = [];
+        res.forEach(element => {
+          let z = element.payload.toJSON();
+          this.__colorArray.push({
+            name: z.name,
+            key: element.payload.key
+          })
+        });
+
+        console.log(this.__colorArray)
+      });
+    }
   }
 
 }

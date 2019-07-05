@@ -7,7 +7,7 @@
               <tr>
                   <th>Date</th>
                   <th>Material Name</th>
-                  <th>Color</th>
+                  <!-- <th>Color</th> -->
                   <th>QTY</th>
                   <th>Base Size</th>
               </tr>
@@ -17,7 +17,7 @@
               <tr *ngFor="let s of prestige.stockInList">
                 <td class="teal-text bold">{{s.date}}</td>
                 <td>{{ s.materialName }}</td>
-                <td>{{ s.color }}</td>
+                <!-- <td>{{ s.color }}</td> -->
                 <td>{{ s.qty }}</td>
                 <td>{{ s.baseLength }}</td>
               </tr>
@@ -31,7 +31,7 @@
             <tr>
                 <th>Date</th>
                 <th>Material Name</th>
-                <th>Color</th>
+                <!-- <th>Color</th> -->
                 <th>Number of Set</th>
                 <th>QTY Used</th>
             </tr>
@@ -41,9 +41,16 @@
             <tr *ngFor="let s of prestige.stockOutList">
               <td class="teal-text bold">{{s.date}}</td>
               <td>{{ s.materialName }}</td>
-              <td>{{ s.color }}</td>
+              <!-- <td>{{ s.color }}</td> -->
               <td>{{ s.numberOfSet }}</td>
-              <td>{{ s.qty }}</td>
+              <td>
+                <ng-container *ngIf="s.qty">
+                    {{ s.qty.match('x') ? s.qty : s.qty+'in' }}
+                </ng-container>
+                <ng-container *ngIf="!s.qty">
+                  -
+                </ng-container>
+            </td>
             </tr>
           </tbody>
         </table>

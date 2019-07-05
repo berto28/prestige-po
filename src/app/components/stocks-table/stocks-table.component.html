@@ -2,7 +2,7 @@
   <h2>Stock Materials <a class="waves-effect waves-light btn modal-trigger" href="#modalStockPO">View PO</a></h2>
   <div class="row">
     <div class="input-field col s6">
-      <input  type="text" class="validate" placeholder="Search by material name" [(ngModel)]="search" (keyup)="onKeyupSearch()">
+      <input  type="text" class="validate" placeholder="Search by material name or item code" [(ngModel)]="search" (keyup)="onKeyupSearch()">
     </div>
     <div class="col s6 searchMessageContainer" *ngIf="prestige.stockList.length == 0 && search != ''">
       <p class="red-text">There's no "{{search}}" material name in the price list</p>
@@ -17,7 +17,9 @@
       <table class="centered highlight">
         <thead>
          <tr>
+          <th>Item Code</th>
           <th>Type</th>
+          <th>From Supplier</th>
           <th>Section</th>
           <th>Color</th>
           <th>Material Name</th>
@@ -29,7 +31,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let m of prestige.stockList | slice:startFrom:toEnd">
+            <td>{{m.itemCode}}</td>
             <td>{{ m.type }}</td>
+            <td>{{ m.fromSupplier }}</td>
             <td>{{ m.section }}</td>
             <td>{{ m.color }}</td>
             <td>{{ m.materialName }}</td>

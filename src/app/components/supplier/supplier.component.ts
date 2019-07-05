@@ -18,6 +18,7 @@ export class SupplierComponent implements OnInit {
 
   ngOnInit() {
     this.prestige.M.init();
+    this.prestige.getTypeSupplierSectionColorName();
     this.prestige.getAllSupplier();
   }
 

@@ -155,7 +155,8 @@ export class CanvasAddComponent implements OnInit {
       section: this.arraySection,
       color: this.arrayColor,
       materials: this.prestige.materials,
-      type: this.typeKey
+      type: this.typeKey,
+      typeName: this.type
     };
     // console.log(obj);
     this.prestige.addCanvas(obj);

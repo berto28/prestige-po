@@ -18,6 +18,7 @@ export class ModalAddPoComponent implements OnInit {
   type = '';
   constructor(public prestige: PrestigeService) { 
     console.log(this.projectKey)
+    prestige.getTypeSupplierSectionColorName();
     prestige.getSupplier();
     this.prestige.dropdownSection.text = 'choose a section';
     this.prestige.dropdownSupplier.text = 'choose a supplier';

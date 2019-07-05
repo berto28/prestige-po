@@ -14,10 +14,11 @@ export class CanvasTableComponent implements OnInit {
   constructor(public prestige: PrestigeService) { }
 
   ngOnInit() {
-
+    this.prestige.getTypeSupplierSectionColorName();
     if(this.prestige.materialList.length == 0){
       console.log('getting canvas')
       this.prestige.getCanvas();
+      // this.prestige.itemCode();
     }
     
     this.onWindowScroll();

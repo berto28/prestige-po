@@ -5,7 +5,7 @@
   </h2>
   <div class="row">
     <div class="input-field col s6">
-      <input  type="text" class="validate" placeholder="Search by material name" [(ngModel)]="search" (keyup)="onKeyupSearch()">
+      <input  type="text" class="validate" placeholder="Search by material name or item code" [(ngModel)]="search" (keyup)="onKeyupSearch()">
     </div>
     <div class="col s6 searchMessageContainer" *ngIf="prestige.materialList.length == 0 && search != ''">
       <p class="red-text">There's no "{{search}}" material name in the price list</p>
@@ -20,6 +20,7 @@
       <table class="centered highlight">
         <thead>
           <tr>
+              <th>Item Code</th>
               <th>Type</th>
               <th>Supplier</th>
               <th>Section</th>
@@ -35,6 +36,7 @@
         <tbody in-view-container>
           
           <tr *ngFor="let m of prestige.materialList | slice:startFrom:toEnd">
+            <td>{{ m.itemCode }}</td>
             <td>{{ m.type }}</td>
             <td>{{ m.supplier }}</td>
             <td>{{ m.section }}</td>
